@@ -23,6 +23,7 @@ app.use(cors({
 }));
 
 app.get('/start', (req, res) => {
+    console.log('API is running...');
     res.send('API is running...');
 });
 
