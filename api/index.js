@@ -12,12 +12,9 @@ dotenv.config();
 
 const app = express();
 
-// Middleware to ensure DB connections
-app.use(async (req, res, next) => {
-    await connectQuesDB();
-    await connectAuthDB();
-    next();
-});
+// Connect to MongoDB once per function instance
+connectQuesDB();
+connectAuthDB();
 
 // Allow only your deployed frontend origin
 app.use(cors({
@@ -29,6 +26,4 @@ app.use(express.json());
 app.use('/api/questions', questionRoute);
 app.use('/api/auth', authRoute);
 
-// ❌ Remove app.listen()
-// ✅ Instead, export a handler
 export default serverless(app);
