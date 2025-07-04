@@ -12,9 +12,12 @@ dotenv.config();
 
 const app = express();
 
-// Connect to MongoDB
-connectQuesDB();
-connectAuthDB();
+// Middleware to ensure DB connections
+app.use(async (req, res, next) => {
+    await connectQuesDB();
+    await connectAuthDB();
+    next();
+});
 
 // Allow only your deployed frontend origin
 app.use(cors({
