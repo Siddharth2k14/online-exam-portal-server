@@ -2,11 +2,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import connectQuesDB from '../server/DB/QuestionDB.js'
-import authRoute from '../server/Routes/AuthRoute.js'
-import connectAuthDB from '../server/DB/AuthDB.js'
+import connectQuesDB from './DB/QuestionDB.js'
+import authRoute from './Routes/AuthRoute.js'
+import connectAuthDB from './DB/AuthDB.js'
 import serverless from 'serverless-http';
-import questionRoute from '../server/Routes/QuestionRoute.js'
+import questionRoute from './Routes/QuestionRoute.js'
 
 dotenv.config();
 
