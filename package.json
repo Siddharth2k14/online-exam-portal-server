@@ -1,11 +1,11 @@
 {
   "name": "your-project-name",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "api/index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon index.js",
-    "dev": "nodemon index.js"
+    "start": "nodemon api/index.js",
+    "dev": "nodemon api/index.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
