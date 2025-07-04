@@ -28,4 +28,4 @@ app.use('/api/auth', authRoute);
 
 // ❌ Remove app.listen()
 // ✅ Instead, export a handler
-export const handler = serverless(app);
+export default serverless(app);
