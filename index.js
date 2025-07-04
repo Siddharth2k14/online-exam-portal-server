@@ -16,7 +16,12 @@ const app = express();
 connectQuesDB();
 connectAuthDB();
 
-app.use(cors());
+// Allow only your deployed frontend origin
+app.use(cors({
+    origin: "https://online-exam-portal-client-bvtz.vercel.app",
+    credentials: true
+}));
+
 app.use(express.json());
 app.use('/api/questions', questionRoute);
 app.use('/api/auth', authRoute);
