@@ -22,7 +22,7 @@ app.use(cors({
     credentials: true
 }));
 
-app.get('/', (req, res) => {
+app.get('/start', (req, res) => {
     res.send('API is running...');
 });
 
