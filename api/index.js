@@ -19,7 +19,7 @@ connectAuthDB();
 
 // Allow only your deployed frontend origin
 app.use(cors({
-    origin: "https://online-exam-portal-client-6qvc.vercel.app/",
+    origin: "https://online-exam-portal-client.vercel.app/",
     credentials: true
 }));
 
