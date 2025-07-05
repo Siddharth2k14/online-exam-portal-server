@@ -11,6 +11,7 @@ import questionRoute from '../Routes/QuestionRoute.js'
 dotenv.config();
 
 const app = express();
+const PORT = 3000;
 
 // Connect to MongoDB once per function instance
 connectQuesDB();
@@ -31,4 +32,6 @@ app.use(express.json());
 app.use('/api/questions', questionRoute);
 app.use('/api/auth', authRoute);
 
-export default serverless(app);
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
