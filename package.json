@@ -1,10 +1,11 @@
 {
   "name": "your-project-name",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "api/index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon index.js"
+    "start": "nodemon api/index.js",
+    "dev": "nodemon api/index.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
@@ -17,6 +18,7 @@
     "mongodb": "^6.17.0",
     "mongoose": "^8.16.0",
     "nodemon": "^3.1.10",
-    "serverless-http": "^3.2.0"
+    "serverless-http": "^3.2.0",
+    "vike": "^0.4.235"
   }
 }
