@@ -45,4 +45,37 @@ router.post('/:role/login', async (req, res) => {
     res.json({ user: { name: user.name || user.email, email: user.email }, token: 'mock-token', role });
 });
 
+router.post('/change-password', async (req, res) => {
+    try {
+        const {
+            currentPassword,
+            newPassword
+        } = req.body;
+
+        const token = req.headers.authorization?.split(' ')[1];
+
+        if(!token){
+            return res.status(401).json({ message: 'Authentication Required' });
+        }
+
+        const user = await AuthModel.findById(token);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (user.password !== currentPassword) {
+            return res.status(401).json({ message: 'Invalid current password' });
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        res.json({ message: 'Password updated successfully' });
+    }
+
+    catch (error) {
+        res.status(500).json({ message: 'Internal server error' });
+    }
+})
+
 export default router;
