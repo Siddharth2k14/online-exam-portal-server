@@ -47,18 +47,15 @@ router.post('/:role/login', async (req, res) => {
 
 router.post('/change-password', async (req, res) => {
     try {
-        const {
-            currentPassword,
-            newPassword
-        } = req.body;
-
+        const { currentPassword, newPassword } = req.body;
         const token = req.headers.authorization?.split(' ')[1];
 
-        if(!token){
+        if (!token) {
             return res.status(401).json({ message: 'Authentication Required' });
         }
 
-        const user = await AuthModel.findById(token);
+        // Find user by email from token
+        const user = await AuthModel.findOne({ email: token });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -71,11 +68,10 @@ router.post('/change-password', async (req, res) => {
         await user.save();
 
         res.json({ message: 'Password updated successfully' });
-    }
-
-    catch (error) {
+    } catch (error) {
+        console.error('Password change error:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
-})
+});
 
 export default router;
