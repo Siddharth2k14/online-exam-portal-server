@@ -54,8 +54,10 @@ router.post('/change-password', async (req, res) => {
             return res.status(401).json({ message: 'Authentication Required' });
         }
 
-        // Find user by email from token
-        const user = await AuthModel.findOne({ email: token });
+        // Decode token to get user email (assuming token is the email for now)
+        const userEmail = token;
+        const user = await AuthModel.findOne({ email: userEmail });
+        
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
