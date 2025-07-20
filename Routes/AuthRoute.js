@@ -1,8 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import AuthModel from '../Models/AuthModel' // Assuming this is your AuthModel
-import auth from '../Middleware/auth'; // Assuming this is your auth middleware
-
+import AuthModel from '../Models/AuthModel.js'; // Assuming this is your AuthModel
 const router = express.Router();
 
 router.post('/signup', async (req, res) => {
