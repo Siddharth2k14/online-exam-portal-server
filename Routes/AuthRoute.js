@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import bcrypt from 'bcrypt';
+import AuthModel from '../Models/AuthModel'; // Assuming this is your AuthModel
+import auth from '../Middleware/auth'; // Assuming this is your auth middleware
+
 const router = express.Router();
-const bcrypt = require('bcrypt');
-const AuthModel = require('../Models/AuthModel'); // Changed from User to AuthModel
-const auth = require('../Middleware/auth');
 
 router.post('/signup', async (req, res) => {
     const { name, email, password, confirmPassword } = req.body;
