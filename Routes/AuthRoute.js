@@ -89,4 +89,4 @@ router.post('/change-password', auth, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectQuesDB from '../DB/QuestionDB.js'
-import authRoute from '../Routes/AuthRoute.js'
+import AuthRoute from '../Routes/AuthRoute.js'
 import connectAuthDB from '../DB/AuthDB.js'
 import serverless from 'serverless-http';
 import questionRoute from '../Routes/QuestionRoute.js'
@@ -21,7 +21,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/questions', questionRoute);
-app.use('/api/auth', authRoute);
+app.use('/api/auth', AuthRoute);
 
 // ❌ Remove app.listen()
 // ✅ Instead, export a handler
