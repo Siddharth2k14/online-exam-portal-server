@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const User = require('../Models/AuthModel');
+const AuthModel = require('../Models/AuthModel'); // Changed from User to AuthModel
 const auth = require('../Middleware/auth');
 
 router.post('/signup', async (req, res) => {
@@ -39,35 +39,54 @@ router.post('/:role/login', async (req, res) => {
     }
 
     // Student login (MongoDB check)
-    const user = await AuthModel.findOne({ email, password });
+    const user = await AuthModel.findOne({ email });
     if (!user) {
         return res.status(401).json({ message: 'Invalid credentials' });
     }
-    res.json({ user: { name: user.name || user.email, email: user.email }, token: 'mock-token', role });
+
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    res.json({ 
+        user: { name: user.name || user.email, email: user.email }, 
+        token: 'mock-token', 
+        role 
+    });
 });
 
 // Change Password Route
 router.post('/change-password', auth, async (req, res) => {
-    // Set proper headers
-    res.setHeader('Content-Type', 'application/json');
-    
     try {
         const { currentPassword, newPassword } = req.body;
-        
-        if (!currentPassword || !newPassword) {
-            return res.status(400).json({ 
-                message: 'Current password and new password are required' 
-            });
+        const userId = req.user.id; // Get from auth middleware
+
+        // Find user
+        const user = await AuthModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
         }
 
-        // Your password update logic here
-        
+        // Verify current password
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Current password is incorrect' });
+        }
+
+        // Hash new password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // Update password
+        user.password = hashedPassword;
+        await user.save();
+
         res.json({ message: 'Password updated successfully' });
     } catch (error) {
-        console.error('Password change error:', error);
-        res.status(500).json({ 
-            message: 'Internal server error during password change' 
-        });
+        console.error('Error in change password:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 });
 
