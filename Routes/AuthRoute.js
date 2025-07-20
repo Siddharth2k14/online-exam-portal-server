@@ -57,7 +57,7 @@ router.post('/:role/login', async (req, res) => {
 });
 
 // Change Password Route
-router.post('/change-password', auth, async (req, res) => {
+router.post('/change-password', async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
         const userId = req.user.id; // Get from auth middleware
