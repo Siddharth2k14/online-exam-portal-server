@@ -1,7 +1,8 @@
-import express from 'express';
-import AuthModel from '../Models/AuthModel.js';
-
+const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
+const User = require('../Models/AuthModel');
+const auth = require('../Middleware/auth');
 
 router.post('/signup', async (req, res) => {
     const { name, email, password, confirmPassword } = req.body;
@@ -45,36 +46,37 @@ router.post('/:role/login', async (req, res) => {
     res.json({ user: { name: user.name || user.email, email: user.email }, token: 'mock-token', role });
 });
 
-router.post('/change-password', async (req, res) => {
-    try {
-        const { currentPassword, newPassword } = req.body;
-        const token = req.headers.authorization?.split(' ')[1];
+// Change Password Route
+router.post('/change-password', auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id; // Get from auth middleware
 
-        if (!token) {
-            return res.status(401).json({ message: 'Authentication Required' });
-        }
-
-        // Decode token to get user email (assuming token is the email for now)
-        const userEmail = token;
-        const user = await AuthModel.findOne({ email: userEmail });
-        console.log(user);
-        
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        if (user.password !== currentPassword) {
-            return res.status(401).json({ message: 'Invalid current password' });
-        }
-
-        user.password = newPassword;
-        await user.save();
-
-        res.json({ message: 'Password updated successfully' });
-    } catch (error) {
-        console.error('Password change error:', error);
-        res.status(500).json({ message: 'Internal server error' });
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Error in change password:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
-export default router;
+module.exports = router;
