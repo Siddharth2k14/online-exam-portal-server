@@ -1,6 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import AuthModel from '../Models/AuthModel'; // Assuming this is your AuthModel
+import AuthModel from '../Models/AuthModel' // Assuming this is your AuthModel
 import auth from '../Middleware/auth'; // Assuming this is your auth middleware
 
 const router = express.Router();
