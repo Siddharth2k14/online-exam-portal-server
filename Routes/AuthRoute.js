@@ -1,7 +1,8 @@
-import express from 'express';
-import bcrypt from 'bcrypt';
-import AuthModel from '../Models/AuthModel.js'; // Assuming this is your AuthModel
+const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
+const User = require('../Models/AuthModel');
+const auth = require('../Middleware/auth');
 
 router.post('/signup', async (req, res) => {
     const { name, email, password, confirmPassword } = req.body;
@@ -38,55 +39,44 @@ router.post('/:role/login', async (req, res) => {
     }
 
     // Student login (MongoDB check)
-    const user = await AuthModel.findOne({ email });
+    const user = await AuthModel.findOne({ email, password });
     if (!user) {
         return res.status(401).json({ message: 'Invalid credentials' });
     }
-
-    // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
-        return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    res.json({ 
-        user: { name: user.name || user.email, email: user.email }, 
-        token: 'mock-token', 
-        role 
-    });
+    res.json({ user: { name: user.name || user.email, email: user.email }, token: 'mock-token', role });
 });
 
 // Change Password Route
-router.post('/change-password', async (req, res) => {
-    try {
-        const { currentPassword, newPassword } = req.body;
-        const userId = req.user.id; // Get from auth middleware
+router.post('/change-password', auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id; // Get from auth middleware
 
-        // Find user
-        const user = await AuthModel.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        // Verify current password
-        const isMatch = await bcrypt.compare(currentPassword, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Current password is incorrect' });
-        }
-
-        // Hash new password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-        // Update password
-        user.password = hashedPassword;
-        await user.save();
-
-        res.json({ message: 'Password updated successfully' });
-    } catch (error) {
-        console.error('Error in change password:', error);
-        res.status(500).json({ message: 'Server error' });
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Error in change password:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
-export default router;
+module.exports = router;
