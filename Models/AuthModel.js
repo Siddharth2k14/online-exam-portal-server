@@ -10,13 +10,20 @@ const AuthSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-
     password: {
         type: String,
         required: true,
     },
+    confirmPassword: {
+        type: String,
+    },
+    role: {
+        type: String, 
+        enum: ['admin', 'student'],
+        default: 'student',
+    }
 });
 
-const AuthModel = mongoose.model("Auth", AuthSchema);
+const User = mongoose.model("Auth", AuthSchema);
 
-export default AuthModel;
+export default User;
