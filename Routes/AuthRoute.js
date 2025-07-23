@@ -8,6 +8,7 @@ dotenv.config();
 const router = express.Router();
 
 router.post('/signup', async (req, res) => {
+  console.log('JWT_SECRET:', process.env.JWT_SECRET);
   console.log(req.body);
   try {
     const { name, email, password, confirmPassword } = req.body;
@@ -38,9 +39,6 @@ router.post('/signup', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
-
-    console.log('JWT_SECRET:', process.env.JWT_SECRET);
-
     res.status(201).json({
       user: { name: newUser.name, email: newUser.email, role: newUser.role },
       token
