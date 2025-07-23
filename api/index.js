@@ -14,8 +14,22 @@ const PORT = 3000
 const app = express();
 
 // Connect to MongoDB
-connectQuesDB();
-connectAuthDB();
+const startServer = async () => {
+    try {
+        await connectQuesDB();
+        await connectAuthDB();
+
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    }
+    catch(error){
+        console.error('Failed to connect to database:', error);
+        process.exit(1);
+    }
+};
+
+startServer();
 
 app.use(cors());
 app.use(express.json());
