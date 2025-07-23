@@ -10,7 +10,7 @@ import process from 'process';
 
 const router = express.Router();
 
-console.log('JWT_SECRET:', process.env.JWT_SECRET);
+// console.log('JWT_SECRET:', process.env.JWT_SECRET);
 router.post('/signup', async (req, res) => {
   console.log(req.body);
   try {
@@ -35,7 +35,7 @@ router.post('/signup', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({ name, email, password: hashedPassword, role });
-    await newUser.save();
+    newUser.save();
 
     // In your signup route
     if (!process.env.JWT_SECRET) {
