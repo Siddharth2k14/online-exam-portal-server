@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import User from '../Models/AuthModel.js';
 import express from 'express';
+import process from 'process';
 
 const router = express.Router();
 

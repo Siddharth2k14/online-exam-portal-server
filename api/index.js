@@ -40,6 +40,6 @@ app.use('/api/auth', AuthRoute);
 // ❌ Remove app.listen()
 // ✅ Instead, export a handler
 // export const handler = serverless(app);
-app.listen(PORT, () => {
-    console.log(`Server is listening at ${PORT}`)
-})
+// app.listen(PORT, () => {
+//     console.log(`Server is listening at ${PORT}`)
+// })
