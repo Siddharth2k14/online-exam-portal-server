@@ -10,8 +10,8 @@ import process from 'process';
 
 const router = express.Router();
 
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
 router.post('/signup', async (req, res) => {
-  console.log('JWT_SECRET:', process.env.JWT_SECRET);
   console.log(req.body);
   try {
     const { name, email, password, confirmPassword } = req.body;
