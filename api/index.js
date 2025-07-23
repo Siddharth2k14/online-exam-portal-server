@@ -1,14 +1,14 @@
 // api/index.js
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import connectQuesDB from '../DB/QuestionDB.js'
 import AuthRoute from '../Routes/AuthRoute.js'
 import connectAuthDB from '../DB/AuthDB.js'
 import serverless from 'serverless-http';
 import questionRoute from '../Routes/QuestionRoute.js'
 
-dotenv.config();
 const PORT = 3000
 
 const app = express();
