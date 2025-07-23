@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
+
+// Other imports should come after dotenv configuration
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import User from '../Models/AuthModel.js';
@@ -34,10 +36,16 @@ router.post('/signup', async (req, res) => {
     const newUser = new User({ name, email, password: hashedPassword, role });
     await newUser.save();
 
+    // In your signup route
+    if (!process.env.JWT_SECRET) {
+        console.error('JWT_SECRET is not defined');
+        return res.status(500).json({ message: 'Server configuration error' });
+    }
+    
     const token = jwt.sign(
-      { userId: newUser._id, role: newUser.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+        { userId: newUser._id, role: newUser.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
     );
     res.status(201).json({
       user: { name: newUser.name, email: newUser.email, role: newUser.role },
