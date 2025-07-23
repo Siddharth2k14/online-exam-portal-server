@@ -39,6 +39,8 @@ router.post('/signup', async (req, res) => {
       { expiresIn: '1h' }
     );
 
+    console.log('JWT_SECRET:', process.env.JWT_SECRET);
+
     res.status(201).json({
       user: { name: newUser.name, email: newUser.email, role: newUser.role },
       token
