@@ -7,14 +7,30 @@ import bcrypt from 'bcryptjs';
 import User from '../Models/AuthModel.js';
 import express from 'express';
 import process from 'process';
+import authMiddleware from '../Middleware/authMiddleware.js';
 
 const router = express.Router();
 
+const validatePassword = (password) => {
+  if (password.length < 8) {
+    throw new Error('Password must be at least 8 characters long');
+  }
+  if (!/[A-Z]/.test(password)) {
+    throw new Error('Password must contain at least one uppercase letter');
+  }
+  if (!/[a-z]/.test(password)) {
+    throw new Error('Password must contain at least one lowercase letter');
+  }
+  if (!/[0-9]/.test(password)) {
+    throw new Error('Password must contain at least one number');
+  }
+}
+
 // console.log('JWT_SECRET:', process.env.JWT_SECRET);
 router.post('/signup', async (req, res) => {
-  console.log(req.body);
   try {
     const { name, email, password, confirmPassword } = req.body;
+    console.log(req.body);
 
     if (!name || !email || !password || !confirmPassword) {
       return res.status(400).json({ message: 'All fields are compulsory' });
@@ -35,18 +51,21 @@ router.post('/signup', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({ name, email, password: hashedPassword, role });
-    newUser.save();
+    await newUser.save().catch(err => {
+      console.error('Error in saving the user:', err);
+      throw new Error('Failed to create user');
+    })
 
     // In your signup route
     if (!process.env.JWT_SECRET) {
-        console.error('JWT_SECRET is not defined');
-        return res.status(500).json({ message: 'Server configuration error' });
+      console.error('JWT_SECRET is not defined');
+      return res.status(500).json({ message: 'Server configuration error' });
     }
-    
+
     const token = jwt.sign(
-        { userId: newUser._id, role: newUser.role },
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
+      { userId: newUser._id, role: newUser.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
     );
     res.status(201).json({
       user: { name: newUser.name, email: newUser.email, role: newUser.role },
@@ -108,10 +127,11 @@ router.post('/:role/login', async (req, res) => {
   }
 });
 
-router.post('/change-password', async (req, res) => {
+router.post('/change-password', authMiddleware, async (req, res) => {
   try {
+    validatePassword(req.body.newPassword);
     const { currentPassword, newPassword } = req.body;
-    const userId = req.user.id;
+    const userId = req.user._id
 
     const user = await User.findById(userId);
     if (!user) {
