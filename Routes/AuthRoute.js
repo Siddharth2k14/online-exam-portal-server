@@ -88,9 +88,9 @@ router.post('/:role/login', async (req, res) => {
     }
 
     // 🔐 Validate role
-    if (!['admin', 'student'].includes(role)) {
-      return res.status(400).json({ message: 'Invalid role' });
-    }
+    // if (!['admin', 'student'].includes(role)) {
+    //   return res.status(400).json({ message: 'Invalid role' });
+    // }
 
     const user = await User.findOne({ email });
     if (!user) {
