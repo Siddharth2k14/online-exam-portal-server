@@ -26,7 +26,7 @@ const validatePassword = (password) => {
   }
 }
 
-// console.log('JWT_SECRET:', process.env.JWT_SECRET);
+// Signup route - remains the same
 router.post('/signup', async (req, res) => {
   try {
     const { name, email, password, confirmPassword } = req.body;
@@ -45,8 +45,10 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    // Determine role from email domain
     const emailDomain = email.split('@')[1];
     const role = emailDomain === 'exam-portal.com' ? 'admin' : 'student';
+    console.log(`Signup - Email: ${email}, Domain: ${emailDomain}, Role: ${role}`);
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -54,9 +56,8 @@ router.post('/signup', async (req, res) => {
     await newUser.save().catch(err => {
       console.error('Error in saving the user:', err);
       throw new Error('Failed to create user');
-    })
+    });
 
-    // In your signup route
     if (!process.env.JWT_SECRET) {
       console.error('JWT_SECRET is not defined');
       return res.status(500).json({ message: 'Server configuration error' });
@@ -67,9 +68,11 @@ router.post('/signup', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
+
     res.status(201).json({
-      user: { name: newUser.name, email: newUser.email, role: newUser.role },
-      token
+      user: { name: newUser.name, email: newUser.email },
+      token,
+      role: newUser.role // Make sure to return the role
     });
 
   } catch (err) {
@@ -78,42 +81,52 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-router.post('/:role/login', async (req, res) => {
+// FIXED: Single login route without role parameter
+router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const { role } = req.params;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'All fields are compulsory' });
     }
 
-    // 🔐 Validate role
-    // if (!['admin', 'student'].includes(role)) {
-    //   return res.status(400).json({ message: 'Invalid role' });
-    // }
-
     const user = await User.findOne({ email });
+    console.log(`Login attempt - Email: ${email}`);
+    console.log(`Found user: ${user ? 'Yes' : 'No'}`);
+    console.log(`User role in DB: ${user?.role}`);
+
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // 🛡 Verify role
-    if (user.role !== role) {
-      return res.status(403).json({ message: `Unauthorized for role: ${role}` });
+    // Determine expected role from email domain
+    const emailDomain = email.split('@')[1];
+    const expectedRole = emailDomain === 'exam-portal.com' ? 'admin' : 'student';
+    console.log(`Expected role from email domain: ${expectedRole}`);
+    console.log(`Stored role in database: ${user.role}`);
+
+    // Verify that stored role matches expected role
+    if (user.role !== expectedRole) {
+      console.log(`Role mismatch - Expected: ${expectedRole}, Found: ${user.role}`);
+      return res.status(403).json({ 
+        message: `Invalid role. Expected ${expectedRole} but found ${user.role}` 
+      });
     }
 
-    // 🔑 Compare password securely
+    // Compare password securely
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // ✅ Generate JWT
+    // Generate JWT
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
+
+    console.log(`Login successful - User: ${user.name}, Role: ${user.role}`);
 
     return res.status(200).json({
       user: { name: user.name, email: user.email },
@@ -122,16 +135,24 @@ router.post('/:role/login', async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Server Error' });
   }
+});
+
+// Keep the old route for backward compatibility (optional)
+router.post('/:role/login', async (req, res) => {
+  console.log('Warning: Using deprecated /:role/login route. Please use /login instead.');
+  // Redirect to the new login route
+  req.url = '/login';
+  return router.handle(req, res);
 });
 
 router.post('/change-password', authMiddleware, async (req, res) => {
   try {
     validatePassword(req.body.newPassword);
     const { currentPassword, newPassword } = req.body;
-    const userId = req.user._id
+    const userId = req.user._id;
 
     const user = await User.findById(userId);
     if (!user) {
@@ -158,6 +179,6 @@ router.post('/change-password', authMiddleware, async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-})
+});
 
 export default router;
