@@ -141,12 +141,12 @@ router.post('/login', async (req, res) => {
 });
 
 // Keep the old route for backward compatibility (optional)
-router.post('/:role/login', async (req, res) => {
-  console.log('Warning: Using deprecated /:role/login route. Please use /login instead.');
-  // Redirect to the new login route
-  req.url = '/login';
-  return router.handle(req, res);
-});
+// router.post('/login', async (req, res) => {
+//   console.log('Warning: Using deprecated /login route. Please use /login instead.');
+//   // Redirect to the new login route
+//   req.url = '/login';
+//   return router.handle(req, res);
+// });
 
 router.post('/change-password', authMiddleware, async (req, res) => {
   try {
