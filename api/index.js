@@ -29,6 +29,10 @@ const startServer = async () => {
     }
 };
 
+app.get('/', (req, res) => {
+    res.status(200).send("Server is alive and working!")
+})
+
 startServer();
 
 app.use(cors());
