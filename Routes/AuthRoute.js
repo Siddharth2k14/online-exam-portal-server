@@ -176,6 +176,9 @@ router.post('/change-password', authMiddleware, async (req, res) => {
       return res.status(401).json({ message: 'Current password is incorrect' });
     }
 
+    console.log(`Old Password for User ${userId}: ${user.password}`)
+    console.log(`New Password for User ${userId}: ${newPassword}`)
+
     // Validate new password format
     try {
       validatePassword(newPassword);
