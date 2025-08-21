@@ -23,14 +23,15 @@ router.post('/objective', async (req, res) => {
 });
 
 router.post('/subjective', async (req, res) => {
-    const { exam_title, question, answer } = req.body;
-    if (!exam_title || !question || !answer) {
+    const { exam_title, question, answer, marks } = req.body;
+    if (!exam_title || !question || !answer || !marks) {
         return res.status(400).json({ message: 'All fields are required' });
     }
     const newQuestion = new SubjectiveOuestionModel({
         exam_name: exam_title, // <-- expects exam_title in request body
         question,
-        answer
+        answer,
+        marks
     });
     await newQuestion.save();
     res.status(201).json({ question: newQuestion });
