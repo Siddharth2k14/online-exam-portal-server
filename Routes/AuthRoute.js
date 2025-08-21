@@ -13,7 +13,7 @@ const router = express.Router();
 
 const validatePassword = (password) => {
   if (password.length < 6) {
-    throw new Error('Password must be at least 8 characters long');
+    throw new Error('Password must be at least 6 characters long');
   }
   if (!/[A-Z]/.test(password)) {
     throw new Error('Password must contain at least one uppercase letter');
