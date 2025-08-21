@@ -108,8 +108,8 @@ router.post('/login', async (req, res) => {
     // Verify that stored role matches expected role
     if (user.role !== expectedRole) {
       console.log(`Role mismatch - Expected: ${expectedRole}, Found: ${user.role}`);
-      return res.status(403).json({ 
-        message: `Invalid role. Expected ${expectedRole} but found ${user.role}` 
+      return res.status(403).json({
+        message: `Invalid role. Expected ${expectedRole} but found ${user.role}`
       });
     }
 
@@ -148,41 +148,63 @@ router.post('/login', async (req, res) => {
 //   return router.handle(req, res);
 // });
 
-// Fixed change-password route
+// Routes/AuthRoute.js - Updated change-password route with better debugging
 router.post('/change-password', authMiddleware, async (req, res) => {
   try {
+    console.log('=== CHANGE PASSWORD ROUTE DEBUG ===');
+    console.log('Request body:', req.body);
+    console.log('User from middleware:', req.user);
+
     const { currentPassword, newPassword } = req.body;
-    
+
     // Validate required fields
     if (!currentPassword || !newPassword) {
+      console.log('Missing required fields');
       return res.status(400).json({ message: 'Current password and new password are required' });
     }
-    
-    const userId = req.user._id;
 
+    // Get user ID from middleware (try both methods for compatibility)
+    const userId = req.user._id || req.user.id || req.userId;
+    console.log('Using user ID:', userId);
+
+    if (!userId) {
+      console.log('No user ID found in request');
+      return res.status(400).json({ message: 'User ID not found in token' });
+    }
+
+    // Find user in database
+    console.log('Searching for user with ID:', userId);
     const user = await User.findById(userId);
+    console.log('User found in change-password route:', !!user);
+
     if (!user) {
+      console.log('User not found in database during password change');
       return res.status(404).json({ message: 'User not found' });
     }
 
+    console.log('Found user:', { id: user._id, email: user.email });
+
     // Check if new password is same as current
     if (currentPassword === newPassword) {
+      console.log('New password same as current');
       return res.status(400).json({ message: 'New password cannot be same as current password' });
     }
 
     // Verify current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
+    console.log('Current password match:', isMatch);
+
     if (!isMatch) {
+      console.log('Current password is incorrect');
       return res.status(401).json({ message: 'Current password is incorrect' });
     }
-
-    console.log(`Old Password for User ${userId}: ${user.password}`)
-    console.log(`New Password for User ${userId}: ${newPassword}`)
 
     // Validate new password format
     try {
       validatePassword(newPassword);
+      console.log('New password validation passed');
     } catch (validationError) {
+      console.log('Password validation failed:', validationError.message);
       return res.status(400).json({ message: validationError.message });
     }
 
@@ -193,14 +215,17 @@ router.post('/change-password', authMiddleware, async (req, res) => {
     user.password = hashedPassword;
     await user.save();
 
-    res.status(200).json({ 
+    console.log('Password updated successfully');
+    console.log('=== END CHANGE PASSWORD ROUTE DEBUG ===');
+
+    res.status(200).json({
       message: 'Password updated successfully',
-      success: true 
+      success: true
     });
 
   } catch (error) {
     console.error('Change password error:', error);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Server Error: ' + error.message });
   }
 });
 
