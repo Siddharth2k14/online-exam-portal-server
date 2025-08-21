@@ -12,7 +12,7 @@ import authMiddleware from '../Middleware/authMiddleware.js';
 const router = express.Router();
 
 const validatePassword = (password) => {
-  if (password.length < 8) {
+  if (password.length < 6) {
     throw new Error('Password must be at least 8 characters long');
   }
   if (!/[A-Z]/.test(password)) {
@@ -148,35 +148,55 @@ router.post('/login', async (req, res) => {
 //   return router.handle(req, res);
 // });
 
+// Fixed change-password route
 router.post('/change-password', authMiddleware, async (req, res) => {
   try {
-    validatePassword(req.body.newPassword);
     const { currentPassword, newPassword } = req.body;
+    
+    // Validate required fields
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Current password and new password are required' });
+    }
+    
     const userId = req.user._id;
 
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    // Check if new password is same as current
     if (currentPassword === newPassword) {
       return res.status(400).json({ message: 'New password cannot be same as current password' });
     }
 
+    // Verify current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid current password' });
+      return res.status(401).json({ message: 'Current password is incorrect' });
     }
 
+    // Validate new password format
+    try {
+      validatePassword(newPassword);
+    } catch (validationError) {
+      return res.status(400).json({ message: validationError.message });
+    }
+
+    // Hash and save new password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
     user.password = hashedPassword;
     await user.save();
 
-    res.json({ message: 'Password updated successfully' });
+    res.status(200).json({ 
+      message: 'Password updated successfully',
+      success: true 
+    });
 
   } catch (error) {
-    console.error(error);
+    console.error('Change password error:', error);
     res.status(500).json({ message: 'Server Error' });
   }
 });
