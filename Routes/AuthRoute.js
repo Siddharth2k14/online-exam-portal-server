@@ -229,4 +229,36 @@ router.post('/change-password', authMiddleware, async (req, res) => {
   }
 });
 
+router.get('/all', async (req, res) => {
+  try {
+    console.log("Fetching all the users based on the roles")
+
+    const expectedRole = "student";
+
+    // Find ALL users with the role "student"
+    const users = await User.find({ role: expectedRole });
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ message: "No students found" });
+    }
+
+    console.log(`Found ${users.length} students`);
+    console.log(users);
+
+    res.json({
+      message: `Found ${users.length} students`,
+      students: users
+    });
+
+    console.log("Fetched all the users")
+
+  } catch (error) {
+    console.error("Error fetching students:", error);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message
+    });
+  }
+});
+
 export default router;
