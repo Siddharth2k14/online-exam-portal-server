@@ -29,7 +29,7 @@ const validatePassword = (password) => {
 // Signup route - remains the same
 router.post('/signup', async (req, res) => {
   try {
-    const { name, email, password, confirmPassword } = req.body;
+    const { name, email, password, confirmPassword, phoneNumber } = req.body;
     console.log(req.body);
 
     if (!name || !email || !password || !confirmPassword) {
@@ -52,7 +52,7 @@ router.post('/signup', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new User({ name, email, password: hashedPassword, role });
+    const newUser = new User({ name, email, password: hashedPassword, role, phoneNumber });
     await newUser.save().catch(err => {
       console.error('Error in saving the user:', err);
       throw new Error('Failed to create user');

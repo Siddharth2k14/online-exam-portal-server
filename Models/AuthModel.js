@@ -21,6 +21,11 @@ const AuthSchema = new mongoose.Schema({
         type: String, 
         enum: ['admin', 'student'],
         default: 'student',
+    },
+    phoneNumber: {
+        type: Number,
+        required: true,
+        unique: true
     }
 });
 
