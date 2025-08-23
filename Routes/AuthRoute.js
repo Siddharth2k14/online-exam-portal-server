@@ -229,31 +229,45 @@ router.post('/change-password', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/all', async (req, res) => {
+// Combined route that handles both student and admin requests
+router.get('/:role/all', async (req, res) => {
   try {
-    console.log("Fetching all the users based on the roles")
+    console.log("Fetching all the users based on the roles");
 
-    const expectedRole = "student";
+    const { role } = req.params;
+    const validRoles = ['student', 'admin'];
 
-    // Find ALL users with the role "student"
-    const users = await User.find({ role: expectedRole });
-
-    if (!users || users.length === 0) {
-      return res.status(404).json({ message: "No students found" });
+    // Validate role parameter
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ 
+        message: "Invalid role. Must be 'student' or 'admin'" 
+      });
     }
 
-    console.log(`Found ${users.length} students`);
+    // Find ALL users with the specified role
+    const users = await User.find({ role: role });
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ 
+        message: `No ${role}s found` 
+      });
+    }
+
+    console.log(`Found ${users.length} ${role}s`);
     console.log(users);
 
+    // Create response with appropriate key
+    const responseKey = role === 'admin' ? 'admins' : 'students';
+    
     res.json({
-      message: `Found ${users.length} students`,
-      students: users
+      message: `Found ${users.length} ${role}s`,
+      [responseKey]: users
     });
 
-    console.log("Fetched all the users")
+    console.log("Fetched all the users");
 
   } catch (error) {
-    console.error("Error fetching students:", error);
+    console.error(`Error fetching ${req.params.role}s:`, error);
     res.status(500).json({
       message: "Internal server error",
       error: error.message
