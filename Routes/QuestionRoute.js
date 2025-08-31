@@ -52,6 +52,8 @@ router.get('/all', async (req, res) => {
             examsMap[q.exam_name].questions.push(q);
         });
 
+        console.log("Exam name", exam_name);
+
         subjectiveQuestions.forEach(q => {
             if (!examsMap[q.exam_name]) {
                 examsMap[q.exam_name] = { exam_title: q.exam_name, questions: [], type: 'Subjective' };
