@@ -47,16 +47,22 @@ router.get('/all', async (req, res) => {
 
         objectiveQuestions.forEach(q => {
             if (!examsMap[q.exam_name]) {
-                examsMap[q.exam_name] = { exam_title: q.exam_name, questions: [], type: 'Objective' };
+                examsMap[q.exam_name] = { exam_title: q.exam_name, questions: [] };
             }
-            examsMap[q.exam_name].questions.push(q);
+            examsMap[q.exam_name].questions.push({
+                ...q.toObject(),
+                type: 'Objective'
+            })
         });
 
         subjectiveQuestions.forEach(q => {
             if (!examsMap[q.exam_name]) {
-                examsMap[q.exam_name] = { exam_title: q.exam_name, questions: [], type: 'Subjective' };
+                examsMap[q.exam_name] = { exam_title: q.exam_name, questions: [] };
             }
-            examsMap[q.exam_name].questions.push(q);
+            examsMap[q.exam_name].questions.push({
+                ...q.toObject(),
+                type: 'Subjective'
+            });
         });
 
         // Convert to array
