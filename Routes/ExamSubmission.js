@@ -1,5 +1,5 @@
 import express from "express"
-import ExamSubmissionModel from "../Models/ExamSubmission"
+import ExamSubmissionModel from "../Models/ExamSubmissionModel"
 import ObjectiveOuestionModel from "../Models/ObjectiveOuestionModel"
 import SubjectiveQuestionModel from "../Models/SubjectiveQuestionModel"
 
@@ -54,7 +54,7 @@ router.post('/submit', async (req, res) => {
 
 router.get('/student/:id', async (req, res) => {
     try {
-        const submissions = await ExamSubmission.find({ student: req.params.id }).populate('student');
+        const submissions = await ExamSubmissionModelModel.find({ student: req.params.id }).populate('student');
         res.json(submissions);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch student submissions' });
@@ -64,7 +64,7 @@ router.get('/student/:id', async (req, res) => {
 
 router.get('/exam/:examName', async (req, res) => {
     try {
-        const submissions = await ExamSubmission.find({ exam: req.params.examName }).populate('student');
+        const submissions = await ExamSubmissionModel.find({ exam: req.params.examName }).populate('student');
         res.json(submissions);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch exam submissions' });
@@ -74,7 +74,7 @@ router.get('/exam/:examName', async (req, res) => {
 // Get all subjective answers for review
 router.get('/review/:examName', async (req, res) => {
   try {
-    const submissions = await ExamSubmission.find({ exam: req.params.examName });
+    const submissions = await ExamSubmissionModel.find({ exam: req.params.examName });
     
     // Filter only subjective answers
     const subjectiveAnswers = submissions.flatMap(sub =>
@@ -100,7 +100,7 @@ router.put('/review/:submissionId/:questionId', async (req, res) => {
   try {
     const { marksAwarded } = req.body;
 
-    const submission = await ExamSubmission.findById(req.params.submissionId);
+    const submission = await ExamSubmissionModel.findById(req.params.submissionId);
     if (!submission) return res.status(404).json({ error: 'Submission not found' });
 
     // Find the question
@@ -123,7 +123,7 @@ router.put('/review/:submissionId/:questionId', async (req, res) => {
 
 router.get('/result/student/:id', async (req, res) => {
   try {
-    const results = await ExamSubmission.find({ student: req.params.id }).populate('student');
+    const results = await ExamSubmissionModel.find({ student: req.params.id }).populate('student');
     res.json(results);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch results' });
@@ -132,7 +132,7 @@ router.get('/result/student/:id', async (req, res) => {
 
 router.get('/result/exam/:examName', async (req, res) => {
   try {
-    const results = await ExamSubmission.find({ exam: req.params.examName }).populate('student');
+    const results = await ExamSubmissionModel.find({ exam: req.params.examName }).populate('student');
     res.json(results);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch exam results' });
