@@ -1,5 +1,5 @@
 import express from "express"
-import ExamSubmissionModel from "../Models/ExamSubmissionModel"
+import ExamSubmissionModel from "../Models/ExamSubmissionModel";
 import ObjectiveOuestionModel from "../Models/ObjectiveOuestionModel"
 import SubjectiveQuestionModel from "../Models/SubjectiveQuestionModel"
 
