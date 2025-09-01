@@ -1,7 +1,7 @@
 import express from "express"
-import ExamSubmissionModel from "../Models/ExamSubmissionModel";
-import ObjectiveOuestionModel from "../Models/ObjectiveOuestionModel"
-import SubjectiveQuestionModel from "../Models/SubjectiveQuestionModel"
+import ExamSubmissionModel from "../Models/ExamSubmissionModel.js";
+import ObjectiveOuestionModel from "../Models/ObjectiveOuestionModel.js"
+import SubjectiveQuestionModel from "../Models/SubjectiveOuestionModel.js";
 
 const router = express.Router();
 

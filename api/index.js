@@ -8,7 +8,7 @@ import AuthRoute from '../Routes/AuthRoute.js'
 import connectAuthDB from '../DB/AuthDB.js'
 import serverless from 'serverless-http';
 import questionRoute from '../Routes/QuestionRoute.js';
-import ExamSubmission from '../Routes/ExamSubmissionRoute.js';
+import ExamSubmissionRoute from "../Routes/ExamSubmissionRoute.js"
 
 const PORT = 3000
 
@@ -41,7 +41,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/questions', questionRoute);
 app.use('/api/auth', AuthRoute);
-app.use('/api/submissions', ExamSubmission);
+app.use('/api/submissions', ExamSubmissionRoute);
 
 // ❌ Remove app.listen()
 // ✅ Instead, export a handler
