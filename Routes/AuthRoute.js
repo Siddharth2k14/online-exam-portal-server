@@ -275,4 +275,30 @@ router.get('/:role/all', async (req, res) => {
   }
 });
 
+router.get('/all', async (req, res) => {
+  try {
+    const users = await User.find();
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ 
+        message: "No users found" 
+      });
+    }
+
+    console.log(`Found ${users.length}`);
+    res.status(200).json({
+      message: "Users fetched successfully",
+      count: users.length,
+      users
+    });
+
+  } catch (error) {
+    console.error("Error in fetching the data", error);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message
+    });
+  }
+});
+
 export default router;
