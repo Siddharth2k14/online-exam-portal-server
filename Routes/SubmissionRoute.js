@@ -3,6 +3,7 @@ import SubmissionModel from "../Models/SubmissionModel.js";
 import User from "../Models/AuthModel.js";
 import ObjectiveQuestionModel from "../Models/ObjectiveOuestionModel.js";
 import SubjectiveQuestionModel from "../Models/SubjectiveOuestionModel.js";
+import authMiddleware from "../Middleware/authMiddleware.js";
 
 const router = express.Router();
 
