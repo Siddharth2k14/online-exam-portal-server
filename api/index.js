@@ -1,6 +1,5 @@
 // api/index.js
 import dotenv from 'dotenv';
-dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import connectQuesDB from '../DB/QuestionDB.js'
@@ -8,6 +7,9 @@ import AuthRoute from '../Routes/AuthRoute.js'
 import connectAuthDB from '../DB/AuthDB.js'
 import serverless from 'serverless-http';
 import questionRoute from '../Routes/QuestionRoute.js';
+import submissionRoute from '../Routes/SubmissionRoute.js';
+
+dotenv.config();
 
 const PORT = 3000
 
@@ -40,6 +42,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/questions', questionRoute);
 app.use('/api/auth', AuthRoute);
+app.use('/api/submissions', submissionRoute);
 
 // ❌ Remove app.listen()
 // ✅ Instead, export a handler
