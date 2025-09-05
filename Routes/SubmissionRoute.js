@@ -1,8 +1,8 @@
 import express from "express";
-import SubmissionModel from "../Models/SubmissionModel";
+import SubmissionModel from "../Models/SubmissionModel.js";
 import User from "../Models/AuthModel";
-import ObjectiveQuestionModel from "../Models/ObjectiveOuestionModel";
-import SubjectiveQuestionModel from "../Models/SubjectiveOuestionModel";
+import ObjectiveQuestionModel from "../Models/ObjectiveOuestionModel.js";
+import SubjectiveQuestionModel from "../Models/SubjectiveOuestionModel.js";
 
 const router = express.Router();
 
