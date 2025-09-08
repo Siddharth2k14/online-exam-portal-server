@@ -193,7 +193,7 @@ router.get('/student/:studentId/history', async (req, res) => {
             });
         }
 
-        const submission = await SubmissionModel.find({ student_id: studentId }).sort({ submitted_at: -1 });
+        const submissions = await SubmissionModel.find({ student_id: studentId }).sort({ submitted_at: -1 });
 
         const examHistory = submissions.map(submission => ({
             _id: submission._id,
