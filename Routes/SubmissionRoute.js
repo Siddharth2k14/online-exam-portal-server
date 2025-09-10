@@ -70,7 +70,7 @@ router.post('/submit', authMiddleware, async (req, res) => {
             questions.forEach((question, index) => {
                 const userAnswer = answers[index];
                 const isCorrect = (
-                    (typeof question.correct_option === "number" && userAnswer === question.correct_option) || (typeof questions.correct_option === "string" && question.options[userAnswer] === question.correct_option)
+                    (typeof question.correct_option === "number" && userAnswer === question.correct_option) || (typeof question.correct_option === "string" && question.options[userAnswer] === question.correct_option)
                 );
 
                 if (isCorrect) {
@@ -79,7 +79,7 @@ router.post('/submit', authMiddleware, async (req, res) => {
 
                 processedAnswer.push({
                     question_index: index,
-                    amswer: userAnswer,
+                    answer: userAnswer,
                     question_text: question.question_text,
                     is_correct: isCorrect
                 });
@@ -93,21 +93,20 @@ router.post('/submit', authMiddleware, async (req, res) => {
                 const userAnswer = answers[index];
                 const isCorrect = areAnswersSimilar(userAnswer, question.answer);
 
-                if (isCorrect) {
-                    subjectiveScore++;
-                }
+                if (isCorrect) subjectiveScore++;
 
                 processedAnswers.push({
                     question_index: index,
                     answer: userAnswer,
                     question_text: question.question_text,
-                    is_correct: null
+                    is_correct: null // or isCorrect if auto-grading is desired
                 });
             });
 
             status = 'Pending Review';
             totalScore = 0;
         }
+
 
         else if (examType === 'Mixed') {
             status = 'Pending Review';
@@ -116,7 +115,7 @@ router.post('/submit', authMiddleware, async (req, res) => {
         // Create submission record
         const submission = new SubmissionModel({
             student_id: studentId,
-            exam_id: examTitle, // Using exam title as ID for now
+            exam_id: examTitle,
             exam_title: examTitle,
             exam_type: examType,
             answers: processedAnswers,
@@ -126,8 +125,9 @@ router.post('/submit', authMiddleware, async (req, res) => {
                 total_score: totalScore
             },
             total_questions: questions.length,
-            status: status
+            status
         });
+
 
         await submission.save();
 
