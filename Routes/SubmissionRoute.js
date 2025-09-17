@@ -13,7 +13,7 @@ function areAnswerSimilar(studentAns, correctAns) {
     }
 
     const clean = (str) => {
-        str.toLowerCase().replace(/[.,/#!$%^&*;:{}=\\-_`~()]/g, "").split(/\s+/).filter(Boolean)
+        return str.toLowerCase().replace(/[.,/#!$%^&*;:{}=\\-_`~()]/g, "").split(/\s+/).filter(Boolean)
     }
 
     const studentWords = new Set(clean(studentAns));
@@ -91,11 +91,11 @@ router.post('/submit', authMiddleware, async (req, res) => {
         else if (examType === 'Subjective') {
             questions.forEach((question, index) => {
                 const userAnswer = answers[index];
-                const isCorrect = areAnswersSimilar(userAnswer, question.answer);
+                const isCorrect = areAnswerSimilar(userAnswer, question.answer);
 
                 if (isCorrect) subjectiveScore++;
 
-                processedAnswers.push({
+                processedAnswer.push({
                     question_index: index,
                     answer: userAnswer,
                     question_text: question.question_text,
@@ -109,46 +109,80 @@ router.post('/submit', authMiddleware, async (req, res) => {
 
 
         else if (examType === 'Mixed') {
+            // Handle mixed exams - process both objective and subjective questions
+            questions.forEach((question, index) => {
+                const userAnswer = answers[index];
+
+                if (question.options) {
+                    // Objective question
+                    const isCorrect = (
+                        (typeof question.correct_option === "number" && userAnswer === question.correct_option) ||
+                        (typeof question.correct_option === "string" && question.options[userAnswer] === question.correct_option)
+                    );
+
+                    if (isCorrect) {
+                        objectiveScore++;
+                    }
+
+                    processedAnswer.push({
+                        question_index: index,
+                        answer: userAnswer,
+                        question_text: question.question_text,
+                        is_correct: isCorrect
+                    });
+                } else {
+                    // Subjective question
+                    processedAnswer.push({
+                        question_index: index,
+                        answer: userAnswer,
+                        question_text: question.question_text,
+                        is_correct: null
+                    });
+                }
+            });
+
             status = 'Pending Review';
-        }
-
-        // Create submission record
-        const submission = new SubmissionModel({
-            student_id: studentId,
-            exam_id: examTitle,
-            exam_title: examTitle,
-            exam_type: examType,
-            answers: processedAnswers,
-            score: {
-                objective_score: objectiveScore,
-                subjective_score: subjectiveScore,
-                total_score: totalScore
-            },
-            total_questions: questions.length,
-            status
-        });
+            totalScore = objectiveScore; // Only count objective for now, subjective needs manual review
 
 
-        await submission.save();
-
-        console.log('Submission saved successfully:', submission._id);
-        console.log('=== END EXAM SUBMISSION DEBUG ===');
-
-        res.status(201).json({
-            message: 'Exam submitted successfully',
-            submission: {
-                id: submission._id,
+            // Create submission record
+            const submission = new SubmissionModel({
+                student_id: studentId,
+                exam_id: examTitle,
                 exam_title: examTitle,
+                exam_type: examType,
+                answers: processedAnswer,
                 score: {
                     objective_score: objectiveScore,
                     subjective_score: subjectiveScore,
                     total_score: totalScore
                 },
                 total_questions: questions.length,
-                status: status,
-                submitted_at: submission.submitted_at
-            }
-        });
+                status
+            });
+
+
+            await submission.save();
+
+            console.log('Submission saved successfully:', submission._id);
+            console.log('=== END EXAM SUBMISSION DEBUG ===');
+
+            res.status(201).json({
+                message: 'Exam submitted successfully',
+                submission: {
+                    id: submission._id,
+                    exam_title: examTitle,
+                    score: {
+                        objective_score: objectiveScore,
+                        subjective_score: subjectiveScore,
+                        total_score: totalScore
+                    },
+                    total_questions: questions.length,
+                    status: status,
+                    submitted_at: submission.submitted_at
+                }
+            });
+        }
     }
 
     catch (error) {
