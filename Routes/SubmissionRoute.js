@@ -5,189 +5,146 @@ import SubjectiveOuestionModel from '../Models/SubjectiveOuestionModel.js';
 
 const router = express.Router();
 
-// Submission Schema
+// Simple Submission Schema
 const SubmissionSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, required: true },
   examTitle: { type: String, required: true },
-  examType: { type: String, enum: ['Objective', 'Subjective'], required: true },
-  answers: { type: mongoose.Schema.Types.Mixed, required: true },
+  examType: { type: String, required: true },
+  answers: { type: Array, required: true },
   score: { type: Number, default: 0 },
   totalQuestions: { type: Number, required: true },
   percentage: { type: Number, default: 0 },
-  status: { type: String, enum: ['submitted', 'graded'], default: 'submitted' },
   submissionTime: { type: Date, default: Date.now },
-  gradedAt: { type: Date }
+  // Optional user tracking - remove if you don't have user auth
+  userEmail: { type: String }, 
+  userName: { type: String }
 });
-
-// Add indexes for better performance
-SubmissionSchema.index({ userId: 1, examTitle: 1 });
-SubmissionSchema.index({ submissionTime: -1 });
 
 const SubmissionModel = mongoose.model('Submission', SubmissionSchema);
 
-// Function to calculate similarity for subjective answers
+// Simple similarity function for subjective answers
 function areAnswersSimilar(studentAns, correctAns) {
   if (!studentAns || !correctAns) return false;
   
-  const clean = (str) =>
-    str
-      .toLowerCase()
-      .replace(/[.,/#!$%^&*;:{}=\\-_`~()]/g, "")
-      .split(/\s+/)
-      .filter(Boolean);
-
-  const studentWords = new Set(clean(studentAns));
-  const correctWords = new Set(clean(correctAns));
-
-  let matchCount = 0;
-  correctWords.forEach((word) => {
-    if (studentWords.has(word)) matchCount++;
+  const normalize = (str) => str.toLowerCase().trim();
+  const student = normalize(studentAns);
+  const correct = normalize(correctAns);
+  
+  // Simple exact match for now - you can improve this later
+  if (student === correct) return true;
+  
+  // Check if student answer contains most words from correct answer
+  const correctWords = correct.split(/\s+/).filter(word => word.length > 2);
+  const studentWords = student.split(/\s+/);
+  
+  let matches = 0;
+  correctWords.forEach(word => {
+    if (studentWords.some(sw => sw.includes(word) || word.includes(sw))) {
+      matches++;
+    }
   });
-
-  return matchCount / correctWords.size >= 0.7;
+  
+  // Consider it correct if 70% of important words match
+  return matches / correctWords.length >= 0.7;
 }
 
-// OPTIMIZED: Fast submission endpoint
+// Submit exam endpoint
 router.post('/submit', async (req, res) => {
   try {
-    const { examTitle, examType, answers, questionCount } = req.body;
-    const userId = req.user?.id; // Assumes auth middleware sets req.user
-
-    if (!examTitle || !examType || !answers || !userId) {
+    const { examTitle, examType, answers } = req.body;
+    
+    // Validate required fields
+    if (!examTitle || !examType || !answers || !Array.isArray(answers)) {
       return res.status(400).json({ 
-        message: 'Missing required fields: examTitle, examType, answers' 
+        message: 'Missing required fields: examTitle, examType, answers',
+        received: { examTitle, examType, answersType: typeof answers }
       });
     }
 
-    // Create submission record immediately
+    console.log('Received submission:', { examTitle, examType, answersLength: answers.length });
+
+    let score = 0;
+    let totalQuestions = answers.length;
+
+    // Calculate score based on exam type
+    if (examType === 'Objective') {
+      try {
+        const questions = await ObjectiveOuestionModel.find({ exam_name: examTitle });
+        
+        if (questions.length === 0) {
+          return res.status(404).json({ message: 'Exam questions not found' });
+        }
+
+        totalQuestions = questions.length;
+        
+        questions.forEach((question, index) => {
+          if (index < answers.length && answers[index] === question.correct_option) {
+            score++;
+          }
+        });
+        
+      } catch (error) {
+        console.error('Error fetching objective questions:', error);
+        return res.status(500).json({ message: 'Error processing objective exam' });
+      }
+      
+    } else if (examType === 'Subjective') {
+      try {
+        const questions = await SubjectiveOuestionModel.find({ exam_name: examTitle });
+        
+        if (questions.length === 0) {
+          return res.status(404).json({ message: 'Exam questions not found' });
+        }
+
+        totalQuestions = questions.length;
+        let totalMarks = 0;
+        let earnedMarks = 0;
+        
+        questions.forEach((question, index) => {
+          const questionMarks = question.marks || 10;
+          totalMarks += questionMarks;
+          
+          if (index < answers.length) {
+            const studentAnswer = answers[index];
+            const correctAnswer = question.answer;
+            
+            if (areAnswersSimilar(studentAnswer, correctAnswer)) {
+              earnedMarks += questionMarks;
+              score++; // Count as correct for percentage calculation
+            }
+          }
+        });
+        
+        // For subjective, we can also track marks-based score
+        console.log(`Subjective exam: ${earnedMarks}/${totalMarks} marks, ${score}/${totalQuestions} questions`);
+        
+      } catch (error) {
+        console.error('Error fetching subjective questions:', error);
+        return res.status(500).json({ message: 'Error processing subjective exam' });
+      }
+    }
+
+    const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+
+    // Save submission to database
     const submission = new SubmissionModel({
-      userId,
       examTitle,
       examType,
       answers,
-      totalQuestions: questionCount || answers.length,
-      status: 'submitted'
+      score,
+      totalQuestions,
+      percentage,
+      // Add user info if available from token/session
+      userEmail: req.user?.email || req.body.userEmail,
+      userName: req.user?.name || req.body.userName
     });
 
     await submission.save();
 
-    // Send immediate response to client
+    console.log(`Submission saved: ${score}/${totalQuestions} (${percentage}%)`);
+
+    // Return success response
     res.status(200).json({
       message: 'Exam submitted successfully',
-      submission: {
-        id: submission._id,
-        status: 'submitted',
-        submissionTime: submission.submissionTime
-      }
-    });
-
-    // Calculate score in background (non-blocking)
-    setImmediate(async () => {
-      try {
-        await calculateAndUpdateScore(submission._id, examTitle, examType, answers);
-      } catch (error) {
-        console.error('Error calculating score in background:', error);
-      }
-    });
-
-  } catch (error) {
-    console.error('Error submitting exam:', error);
-    res.status(500).json({ message: 'Failed to submit exam' });
-  }
-});
-
-// Background function to calculate score
-async function calculateAndUpdateScore(submissionId, examTitle, examType, answers) {
-  try {
-    let score = 0;
-    let totalPossibleScore = 0;
-
-    if (examType === 'Objective') {
-      // Get correct answers efficiently
-      const questions = await ObjectiveOuestionModel
-        .find({ exam_name: examTitle })
-        .select('correct_option')
-        .lean();
-
-      totalPossibleScore = questions.length;
-
-      questions.forEach((q, idx) => {
-        if (idx < answers.length && answers[idx] === q.correct_option) {
-          score++;
-        }
-      });
-
-    } else if (examType === 'Subjective') {
-      // Get correct answers and marks
-      const questions = await SubjectiveOuestionModel
-        .find({ exam_name: examTitle })
-        .select('answer marks')
-        .lean();
-
-      questions.forEach((q, idx) => {
-        totalPossibleScore += q.marks || 10;
-        if (idx < answers.length) {
-          const userAnswer = answers[idx]?.trim();
-          const correctAnswer = q.answer?.trim();
-          
-          if (areAnswersSimilar(userAnswer, correctAnswer)) {
-            score += q.marks || 10;
-          }
-        }
-      });
-    }
-
-    // Calculate percentage
-    const percentage = totalPossibleScore > 0 
-      ? Math.round((score / totalPossibleScore) * 100) 
-      : 0;
-
-    // Update submission with calculated score
-    await SubmissionModel.findByIdAndUpdate(submissionId, {
-      score,
-      percentage,
-      status: 'graded',
-      gradedAt: new Date()
-    });
-
-    console.log(`Score calculated for submission ${submissionId}: ${score}/${totalPossibleScore} (${percentage}%)`);
-
-  } catch (error) {
-    console.error('Error in background score calculation:', error);
-  }
-}
-
-// Get submission results
-router.get('/result/:submissionId', async (req, res) => {
-  try {
-    const { submissionId } = req.params;
-    const userId = req.user?.id;
-
-    const submission = await SubmissionModel
-      .findOne({ _id: submissionId, userId })
-      .lean();
-
-    if (!submission) {
-      return res.status(404).json({ message: 'Submission not found' });
-    }
-
-    // If still being graded, return current status
-    if (submission.status === 'submitted') {
-      return res.json({
-        status: 'processing',
-        message: 'Your exam is being graded. Please check back in a moment.',
-        submission: {
-          id: submission._id,
-          examTitle: submission.examTitle,
-          submissionTime: submission.submissionTime,
-          status: submission.status
-        }
-      });
-    }
-
-    // Return full results
-    res.json({
-      status: 'completed',
       submission: {
         id: submission._id,
         examTitle: submission.examTitle,
@@ -195,49 +152,60 @@ router.get('/result/:submissionId', async (req, res) => {
         score: submission.score,
         totalQuestions: submission.totalQuestions,
         percentage: submission.percentage,
-        submissionTime: submission.submissionTime,
-        gradedAt: submission.gradedAt
+        submissionTime: submission.submissionTime
       }
     });
 
   } catch (error) {
-    console.error('Error fetching submission result:', error);
+    console.error('Error submitting exam:', error);
+    res.status(500).json({ 
+      message: 'Failed to submit exam', 
+      error: error.message 
+    });
+  }
+});
+
+// Get submission result
+router.get('/result/:submissionId', async (req, res) => {
+  try {
+    const submission = await SubmissionModel.findById(req.params.submissionId);
+    
+    if (!submission) {
+      return res.status(404).json({ message: 'Submission not found' });
+    }
+
+    res.json({
+      submission: {
+        id: submission._id,
+        examTitle: submission.examTitle,
+        examType: submission.examType,
+        score: submission.score,
+        totalQuestions: submission.totalQuestions,
+        percentage: submission.percentage,
+        submissionTime: submission.submissionTime
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error fetching result:', error);
     res.status(500).json({ message: 'Failed to fetch result' });
   }
 });
 
-// Get all submissions for a user
-router.get('/history', async (req, res) => {
+// Get all submissions (optional - for admin or user history)
+router.get('/all', async (req, res) => {
   try {
-    const userId = req.user?.id;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
     const submissions = await SubmissionModel
-      .find({ userId })
+      .find()
       .sort({ submissionTime: -1 })
-      .skip(skip)
-      .limit(limit)
-      .select('-answers') // Don't send answers in history
-      .lean();
+      .select('-answers') // Don't include full answers in list view
+      .limit(100); // Limit results
 
-    const total = await SubmissionModel.countDocuments({ userId });
-
-    res.json({
-      submissions,
-      pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(total / limit),
-        totalSubmissions: total,
-        hasNext: skip + submissions.length < total,
-        hasPrev: page > 1
-      }
-    });
-
+    res.json({ submissions });
+    
   } catch (error) {
-    console.error('Error fetching submission history:', error);
-    res.status(500).json({ message: 'Failed to fetch history' });
+    console.error('Error fetching submissions:', error);
+    res.status(500).json({ message: 'Failed to fetch submissions' });
   }
 });
 
