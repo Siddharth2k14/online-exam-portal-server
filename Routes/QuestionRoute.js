@@ -45,7 +45,7 @@ ensureIndexes();
 
 router.post('/objective', async (req, res) => {
   try {
-    const { examTitle, question, options, correct } = req.body;
+    const { examTitle, question, options, correct, timer } = req.body;
     
     if (!examTitle || !question || !options || correct === undefined || correct === null) {
       return res.status(400).json({ message: 'All fields are required' });
@@ -56,7 +56,8 @@ router.post('/objective', async (req, res) => {
       exam_name: examTitle,
       question_title: question,
       options: options,
-      correct_option: correct
+      correct_option: correct,
+      timer: timer
     });
 
     await newQuestion.save();
@@ -73,7 +74,7 @@ router.post('/objective', async (req, res) => {
 
 router.post('/subjective', async (req, res) => {
   try {
-    const { exam_title, question, answer, marks } = req.body;
+    const { exam_title, question, answer, marks, timer } = req.body;
     
     if (!exam_title || !question || !answer || !marks) {
       return res.status(400).json({ message: 'All fields are required' });
@@ -83,7 +84,8 @@ router.post('/subjective', async (req, res) => {
       exam_name: exam_title,
       question,
       answer,
-      marks
+      marks,
+      timer
     });
 
     await newQuestion.save();
@@ -121,7 +123,8 @@ router.get('/all', async (req, res) => {
                 question_title: "$question_title",
                 question: "$question_title", // For consistency
                 options: "$options",
-                correct_option: "$correct_option"
+                correct_option: "$correct_option",
+                timer: "$timer"
               }
             }
           }
@@ -137,7 +140,8 @@ router.get('/all', async (req, res) => {
               $push: {
                 question: "$question",
                 answer: "$answer",
-                marks: "$marks"
+                marks: "$marks",
+                timer: "$timer"
               }
             }
           }
@@ -214,7 +218,8 @@ router.get('/exam/:examTitle', async (req, res) => {
         questions: objectiveQuestions.map(q => ({
           question_text: q.question_title,
           options: q.options,
-          correct_option: q.correct_option
+          correct_option: q.correct_option,
+          timer: q.timer
         }))
       };
     } else if (subjectiveQuestions.length > 0) {
@@ -224,7 +229,8 @@ router.get('/exam/:examTitle', async (req, res) => {
         questions: subjectiveQuestions.map(q => ({
           question_text: q.question,
           answer: q.answer,
-          marks: q.marks
+          marks: q.marks,
+          timer: q.timer
         }))
       };
     }
