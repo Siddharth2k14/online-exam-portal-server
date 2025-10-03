@@ -56,7 +56,7 @@ router.post('/objective', async (req, res) => {
       exam_name: examTitle,
       question_title: question,
       options: options,
-      correct_option: correct
+      correct_option: correct,
     });
 
     await newQuestion.save();
