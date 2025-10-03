@@ -45,7 +45,7 @@ ensureIndexes();
 
 router.post('/objective', async (req, res) => {
   try {
-    const { examTitle, question, options, correct, timer } = req.body;
+    const { examTitle, question, options, correct } = req.body;
     
     if (!examTitle || !question || !options || correct === undefined || correct === null) {
       return res.status(400).json({ message: 'All fields are required' });
@@ -56,8 +56,7 @@ router.post('/objective', async (req, res) => {
       exam_name: examTitle,
       question_title: question,
       options: options,
-      correct_option: correct,
-      timer: timer
+      correct_option: correct
     });
 
     await newQuestion.save();
@@ -123,8 +122,7 @@ router.get('/all', async (req, res) => {
                 question_title: "$question_title",
                 question: "$question_title", // For consistency
                 options: "$options",
-                correct_option: "$correct_option",
-                timer: "$timer"
+                correct_option: "$correct_option"
               }
             }
           }
@@ -218,8 +216,7 @@ router.get('/exam/:examTitle', async (req, res) => {
         questions: objectiveQuestions.map(q => ({
           question_text: q.question_title,
           options: q.options,
-          correct_option: q.correct_option,
-          timer: q.timer
+          correct_option: q.correct_option
         }))
       };
     } else if (subjectiveQuestions.length > 0) {
