@@ -5,43 +5,43 @@ import SubjectiveOuestionModel from '../Models/SubjectiveOuestionModel.js';
 const router = express.Router();
 
 // Simple in-memory cache (consider Redis for production)
-const cache = {
-  data: null,
-  timestamp: 0,
-  TTL: 5 * 60 * 1000, // 5 minutes
+// const cache = {
+//   data: null,
+//   timestamp: 0,
+//   TTL: 5 * 60 * 1000, // 5 minutes
   
-  isValid() {
-    return this.data && (Date.now() - this.timestamp) < this.TTL;
-  },
+//   isValid() {
+//     return this.data && (Date.now() - this.timestamp) < this.TTL;
+//   },
   
-  set(data) {
-    this.data = data;
-    this.timestamp = Date.now();
-  },
+//   set(data) {
+//     this.data = data;
+//     this.timestamp = Date.now();
+//   },
   
-  get() {
-    return this.isValid() ? this.data : null;
-  },
+//   get() {
+//     return this.isValid() ? this.data : null;
+//   },
   
-  clear() {
-    this.data = null;
-    this.timestamp = 0;
-  }
-};
+//   clear() {
+//     this.data = null;
+//     this.timestamp = 0;
+//   }
+// };
 
-// OPTIMIZED: Create database indexes for better performance
-const ensureIndexes = async () => {
-  try {
-    await ObjectiveOuestionModel.collection.createIndex({ exam_name: 1 });
-    await SubjectiveOuestionModel.collection.createIndex({ exam_name: 1 });
-    console.log('Database indexes created successfully');
-  } catch (error) {
-    console.error('Error creating indexes:', error);
-  }
-};
+// // OPTIMIZED: Create database indexes for better performance
+// const ensureIndexes = async () => {
+//   try {
+//     await ObjectiveOuestionModel.collection.createIndex({ exam_name: 1 });
+//     await SubjectiveOuestionModel.collection.createIndex({ exam_name: 1 });
+//     console.log('Database indexes created successfully');
+//   } catch (error) {
+//     console.error('Error creating indexes:', error);
+//   }
+// };
 
-// Call this when server starts
-ensureIndexes();
+// // Call this when server starts
+// ensureIndexes();
 
 router.post('/objective', async (req, res) => {
   try {
@@ -60,9 +60,6 @@ router.post('/objective', async (req, res) => {
     });
 
     await newQuestion.save();
-    
-    // Clear cache when new question is added
-    cache.clear();
     
     res.status(201).json({ question: newQuestion });
   } catch (error) {
@@ -89,8 +86,8 @@ router.post('/subjective', async (req, res) => {
 
     await newQuestion.save();
     
-    // Clear cache when new question is added
-    cache.clear();
+    // // Clear cache when new question is added
+    // cache.clear();
     
     res.status(201).json({ question: newQuestion });
   } catch (error) {
@@ -103,10 +100,10 @@ router.post('/subjective', async (req, res) => {
 router.get('/all', async (req, res) => {
   try {
     // Check cache first
-    const cachedData = cache.get();
-    if (cachedData) {
-      return res.json(cachedData);
-    }
+    // const cachedData = cache.get();
+    // if (cachedData) {
+    //   return res.json(cachedData);
+    // }
 
     // Use MongoDB aggregation pipeline for better performance
     const [objectiveResults, subjectiveResults] = await Promise.all([
@@ -181,8 +178,8 @@ router.get('/all', async (req, res) => {
     const examsArray = Array.from(examsMap.values());
     
     // Cache the result
-    const responseData = { exams: examsArray };
-    cache.set(responseData);
+    // const responseData = { exams: examsArray };
+    // cache.set(responseData);
 
     res.json(responseData);
 
@@ -290,7 +287,7 @@ router.delete('/objective/:exam_title', async (req, res) => {
     await ObjectiveOuestionModel.deleteMany({ exam_name: examTitle });
     
     // Clear cache when data is deleted
-    cache.clear();
+    // cache.clear();
     
     res.status(200).json({ message: 'Exam deleted successfully' });
   } catch (error) {
@@ -305,7 +302,7 @@ router.delete('/subjective/:exam_title', async (req, res) => {
     await SubjectiveOuestionModel.deleteMany({ exam_name: examTitle });
     
     // Clear cache when data is deleted
-    cache.clear();
+    // cache.clear();
     
     res.status(200).json({ message: 'Exam deleted successfully' });
   } catch (error) {
