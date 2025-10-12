@@ -32,8 +32,7 @@ const startServer = async () => {
 };
 
 const allowedOrigins = [
-    'https://online-exam-portal-client.vercel.app/',
-    /\.vercel\.app$/
+    "https://online-exam-portal-client.vercel.app/"
 ];
 
 app.get('/', (req, res) => {
