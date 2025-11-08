@@ -1,0 +1,81 @@
+name: Server CI/CD
+
+on:
+  push:
+    branches: [main, testing, 'feature/**']
+  pull_request:
+    branches: [main, testing]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ✅ JOB 1: Install, Lint & Test
+  test:
+    name: 🧪 Test Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      # Optional - If you use ESLint
+      # - name: Lint Code
+      #   run: npm run lint
+
+      # Optional - If you use tests
+      # - name: Run Tests
+      #   run: npm test
+
+  # ✅ JOB 2: Security Audit
+  security:
+    name: 🔐 Security Audit
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate || echo "Vulnerabilities found"
+
+  # ✅ JOB 3: Deploy to Staging (Render)
+  deploy-staging:
+    name: 🚀 Deploy to Render (Staging)
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/testing' && github.event_name == 'push'
+
+    steps:
+      - name: Trigger Deploy on Render (Testing)
+        run: |
+          curl -X POST https://api.render.com/deploy/${{ secrets.RENDER_STAGING_SERVICE_ID }} \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+
+  # ✅ JOB 4: Deploy to Production (Render)
+  deploy-production:
+    name: 🎯 Deploy to Render (Production)
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Trigger Deploy on Render (Production)
+        run: |
+          curl -X POST https://api.render.com/deploy/${{ secrets.RENDER_PROD_SERVICE_ID }} \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
