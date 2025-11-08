@@ -8,6 +8,7 @@ import connectAuthDB from '../DB/AuthDB.js'
 import serverless from 'serverless-http';
 import questionRoute from '../Routes/QuestionRoute.js';
 import submissionRoute from '../Routes/SubmissionRoute.js';
+import AiRoute from '../Routes/AIRoute.js';
 
 dotenv.config();
 
@@ -64,6 +65,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/questions', questionRoute);
 app.use('/api/auth', AuthRoute);
 app.use('/api/submissions', submissionRoute);
+app.use('/api/ai', AiRoute);
 
 // ❌ Remove app.listen()
 // ✅ Instead, export a handler
