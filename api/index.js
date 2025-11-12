@@ -8,8 +8,6 @@ import connectAuthDB from '../DB/AuthDB.js'
 import serverless from 'serverless-http';
 import questionRoute from '../Routes/QuestionRoute.js';
 import submissionRoute from '../Routes/SubmissionRoute.js';
-import AiRoute from '../Routes/AIRoute.js';
-import OpenAI from 'openai/index.js';
 
 dotenv.config();
 
@@ -38,20 +36,7 @@ app.get('/', (req, res) => {
     res.status(200).send("Server is alive and working!")
 })
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
-
 startServer();
-
-export const generateResponse = async (userInput) => {
-    const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: userInput }],
-    });
-
-    return response.choices[0].message.content;
-};
 
 app.use(cors());
 
