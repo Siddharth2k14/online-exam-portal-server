@@ -45,7 +45,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/questions', questionRoute);
 app.use('/api/auth', AuthRoute);
 app.use('/api/submissions', submissionRoute);
-app.use('/api/ai', AiRoute);
 
 // ❌ Remove app.listen()
 // ✅ Instead, export a handler
