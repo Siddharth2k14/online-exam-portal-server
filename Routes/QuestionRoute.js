@@ -178,7 +178,7 @@ router.get('/all', async (req, res) => {
     const examsArray = Array.from(examsMap.values());
     
     // Cache the result
-    // const responseData = { exams: examsArray };
+    const responseData = { exams: examsArray };
     // cache.set(responseData);
 
     res.json(responseData);
