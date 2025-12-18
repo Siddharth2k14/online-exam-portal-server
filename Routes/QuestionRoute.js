@@ -77,11 +77,11 @@ router.post('/subjective', async (req, res) => {
     }
 
     const newQuestion = new SubjectiveOuestionModel({
-      exam_name: exam_title,
-      question,
-      answer,
-      marks,
-      timer
+      exam_name: String(exam_title),
+      question: String(question),
+      answer: String(answer),
+      marks: Number(marks),
+      timer: Number(timer)
     });
 
     await newQuestion.save();
