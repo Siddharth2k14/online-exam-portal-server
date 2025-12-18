@@ -35,6 +35,7 @@ const ObjectiveQuestionSchema = new mongoose.Schema({
         type: Number,
         required: true,
         unique: false,
+        default: null,
     },
 
 });

@@ -72,8 +72,12 @@ router.post('/subjective', async (req, res) => {
   try {
     const { exam_title, question, answer, marks, timer } = req.body;
     
-    if (!exam_title || !question || !answer || !marks) {
+    if (!exam_title || !question || !answer || marks === undefined) {
       return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    if (timer != null && isNan(timer)) {
+      return res.status(400).json({ message: "Invalid timer value" });
     }
 
     const newQuestion = new SubjectiveOuestionModel({
@@ -81,7 +85,7 @@ router.post('/subjective', async (req, res) => {
       question: String(question),
       answer: String(answer),
       marks: Number(marks),
-      timer: Number(timer)
+      timer: timer != null ? Number(timer) : null
     });
 
     await newQuestion.save();
