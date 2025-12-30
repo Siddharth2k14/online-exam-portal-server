@@ -43,6 +43,7 @@ const router = express.Router();
 // // Call this when server starts
 // ensureIndexes();
 
+
 router.post('/objective', async (req, res) => {
   try {
     const { examTitle, question, options, correct } = req.body;
@@ -85,7 +86,7 @@ router.post('/subjective', async (req, res) => {
       question: question,
       answer: answer,
       marks: marks,
-      timer: timer != null ? timer : null
+      timer: timer != null ? Number(timer) : null
     });
 
     await newQuestion.save();
