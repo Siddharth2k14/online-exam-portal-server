@@ -9,20 +9,20 @@ const router = express.Router();
 //   data: null,
 //   timestamp: 0,
 //   TTL: 5 * 60 * 1000, // 5 minutes
-  
+
 //   isValid() {
 //     return this.data && (Date.now() - this.timestamp) < this.TTL;
 //   },
-  
+
 //   set(data) {
 //     this.data = data;
 //     this.timestamp = Date.now();
 //   },
-  
+
 //   get() {
 //     return this.isValid() ? this.data : null;
 //   },
-  
+
 //   clear() {
 //     this.data = null;
 //     this.timestamp = 0;
@@ -47,7 +47,7 @@ const router = express.Router();
 router.post('/objective', async (req, res) => {
   try {
     const { examTitle, question, options, correct } = req.body;
-    
+
     if (!examTitle || !question || !options || correct === undefined || correct === null) {
       return res.status(400).json({ message: 'All fields are required' });
     }
@@ -61,7 +61,7 @@ router.post('/objective', async (req, res) => {
     });
 
     await newQuestion.save();
-    
+
     res.status(201).json({ question: newQuestion });
   } catch (error) {
     console.error('Error creating objective question:', error);
@@ -72,12 +72,12 @@ router.post('/objective', async (req, res) => {
 router.post('/subjective', async (req, res) => {
   try {
     const { exam_title, question, answer, marks, timer } = req.body;
-    
+
     if (!exam_title || !question || !answer || marks === undefined) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    if (timer != null && isNan(timer)) {
+    if (timer != null && isNaN(timer)) {
       return res.status(400).json({ message: "Invalid timer value" });
     }
 
@@ -90,10 +90,10 @@ router.post('/subjective', async (req, res) => {
     });
 
     await newQuestion.save();
-    
+
     // // Clear cache when new question is added
     // cache.clear();
-    
+
     res.status(201).json({ question: newQuestion });
   } catch (error) {
     console.error('Error creating subjective question:', error);
@@ -181,7 +181,7 @@ router.get('/all', async (req, res) => {
     });
 
     const examsArray = Array.from(examsMap.values());
-    
+
     // Cache the result
     const responseData = { exams: examsArray };
     // cache.set(responseData);
@@ -198,7 +198,7 @@ router.get('/all', async (req, res) => {
 router.get('/exam/:examTitle', async (req, res) => {
   try {
     const { examTitle } = req.params;
-    
+
     // Use Promise.all for parallel queries
     const [objectiveQuestions, subjectiveQuestions] = await Promise.all([
       ObjectiveOuestionModel.find({ exam_name: examTitle }).lean(),
@@ -245,16 +245,16 @@ router.get('/exam/:examTitle', async (req, res) => {
 router.get('/objective/:examTitle', async (req, res) => {
   try {
     const { examTitle } = req.params;
-    
+
     // Use lean() for better performance
     const filteredQuestions = await ObjectiveOuestionModel
       .find({ exam_name: examTitle })
       .lean();
-      
+
     if (filteredQuestions.length === 0) {
       return res.status(404).json({ message: 'No questions found for this exam' });
     }
-    
+
     res.json({ questions: filteredQuestions });
   } catch (error) {
     console.error('Error fetching objective questions:', error);
@@ -265,20 +265,20 @@ router.get('/objective/:examTitle', async (req, res) => {
 router.get('/subjective/:examTitle', async (req, res) => {
   try {
     const { examTitle } = req.params;
-    
+
     console.log('Looking for exam_name:', examTitle);
-    
+
     // Use lean() for better performance and exact match instead of regex
     const filteredQuestions = await SubjectiveOuestionModel
       .find({ exam_name: examTitle })
       .lean();
-      
+
     console.log('Found:', filteredQuestions);
 
     if (filteredQuestions.length === 0) {
       return res.status(404).json({ message: 'No questions found for this exam' });
     }
-    
+
     res.json({ questions: filteredQuestions });
   } catch (error) {
     console.error('Error fetching subjective questions:', error);
@@ -290,10 +290,10 @@ router.delete('/objective/:exam_title', async (req, res) => {
   try {
     const examTitle = req.params.exam_title;
     await ObjectiveOuestionModel.deleteMany({ exam_name: examTitle });
-    
+
     // Clear cache when data is deleted
     // cache.clear();
-    
+
     res.status(200).json({ message: 'Exam deleted successfully' });
   } catch (error) {
     console.error('Error deleting objective exam:', error);
@@ -305,10 +305,10 @@ router.delete('/subjective/:exam_title', async (req, res) => {
   try {
     const examTitle = req.params.exam_title;
     await SubjectiveOuestionModel.deleteMany({ exam_name: examTitle });
-    
+
     // Clear cache when data is deleted
     // cache.clear();
-    
+
     res.status(200).json({ message: 'Exam deleted successfully' });
   } catch (error) {
     console.error('Error deleting subjective exam:', error);
