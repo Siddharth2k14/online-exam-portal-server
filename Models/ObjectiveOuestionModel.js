@@ -30,14 +30,6 @@ const ObjectiveQuestionSchema = new mongoose.Schema({
         required: true,
         unique: false,
     },
-
-    timer: {
-        type: Number,
-        required: true,
-        unique: false,
-        default: null,
-    },
-
 });
 
 const ObjectiveOuestionModel = mongoose.model("Question", ObjectiveQuestionSchema);
