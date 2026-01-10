@@ -54,3 +54,5 @@ router.post(
         res.json({ message: "Exam started successfully" });
     }
 );
+
+export default router;
