@@ -18,14 +18,18 @@ const AuthSchema = new mongoose.Schema({
         type: String,
     },
     role: {
-        type: String, 
+        type: String,
         enum: ['admin', 'student'],
         default: 'student',
     },
     phoneNumber: {
-        type: Number,
+        type: String,
         required: true,
         unique: true
+    },
+    isVerified: {
+        type: Boolean,
+        default: false,
     }
 });
 

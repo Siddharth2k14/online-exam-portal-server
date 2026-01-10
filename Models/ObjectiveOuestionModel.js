@@ -7,6 +7,12 @@ const ObjectiveQuestionSchema = new mongoose.Schema({
         unique: true,
     },
 
+    exam_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Exam",
+        required: true,
+    },
+
     exam_name: {
         type: String,
         required: true,

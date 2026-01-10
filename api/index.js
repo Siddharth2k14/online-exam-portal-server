@@ -8,6 +8,7 @@ import connectAuthDB from '../DB/AuthDB.js'
 import serverless from 'serverless-http';
 import questionRoute from '../Routes/QuestionRoute.js';
 import submissionRoute from '../Routes/SubmissionRoute.js';
+import assignExamRoute from '../Routes/AssignExamRoute.js';
 
 dotenv.config();
 
@@ -25,7 +26,7 @@ const startServer = async () => {
             console.log(`Server is running on port ${PORT}`);
         });
     }
-    catch(error){
+    catch (error) {
         console.error('Failed to connect to database:', error);
         process.exit(1);
     }
@@ -45,6 +46,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/questions', questionRoute);
 app.use('/api/auth', AuthRoute);
 app.use('/api/submissions', submissionRoute);
+app.use('/api/exams/assign', assignExamRoute);
 
 // ❌ Remove app.listen()
 // ✅ Instead, export a handler
