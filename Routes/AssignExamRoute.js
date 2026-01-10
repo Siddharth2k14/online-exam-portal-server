@@ -3,7 +3,6 @@ import checkExamAccess from "../Middleware/checkExamAccess.js";
 import ObjectiveOuestionModel from "../Models/ObjectiveOuestionModel.js";
 import express from "express";
 import verifyToken from "../Middleware/authMiddleware.js";
-import checkExamAccess from "../Middleware/checkExamAccess.js";
 import dotenv from "dotenv";
 dotenv.config();
 
