@@ -81,7 +81,7 @@ router.get("/assigned", verifyToken, async (req, res) => {
     }
 });
 
-router.post("/assign", verifyToken, async (req, res) => {
+router.post("/assign", async (req, res) => {
     try {
         const { exam_name, studentId } = req.body;
 
