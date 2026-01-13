@@ -64,7 +64,7 @@ router.get("/assigned", verifyToken, async (req, res) => {
         const studentId = req.user.id;
         const assignments = await ExamAssignmentModel.find({
             studentId
-        }).json();
+        }).lean();
 
         const exams = assignments.map(a => ({
             exam_name: a.exam_name,
