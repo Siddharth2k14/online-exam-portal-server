@@ -1,43 +1,33 @@
 import mongoose from "mongoose";
-import { ref } from "process";
 
 const ExamAssignmentSchema = new mongoose.Schema({
     studentId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true
+        ref: "Auth",
+        required: true,
     },
 
-    examId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Exam",
-        required: true
+    exam_name: {
+        type: String,
+        required: true,
     },
 
     status: {
         type: String,
-        enum: ["assigned", "completed", "started"],
-        default: "assigned"
+        enum: ["assigned", "started", "completed"],
+        default: "assigned",
     },
 
     assignedAt: {
         type: Date,
-        default: Date.now
+        default: Date.now,
     },
-
-    attemptCount: {
-        type: Number,
-        default: 0
-    }
 });
 
-ExamAssignmentSchema.index({
-    studentId: 1,
-    examId: 1
-}, {
-    unique: true
-});
+// Prevent duplicate assignment
+ExamAssignmentSchema.index(
+    { studentId: 1, exam_name: 1 },
+    { unique: true }
+);
 
-const ExamAssignmentModel = mongoose.model("ExamAssignment", ExamAssignmentSchema);
-
-export default ExamAssignmentModel;
+export default mongoose.model("ExamAssignment", ExamAssignmentSchema);

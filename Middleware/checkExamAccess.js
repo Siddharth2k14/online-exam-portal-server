@@ -2,11 +2,11 @@ import ExamAssignmentModel from "../Models/ExamAssignmentModel.js";
 
 const checkExamAccess = async (req, res, next) => {
     try {
-        const { examId } = req.params;
+        const { examTitle } = req.params;
 
         const assignment = await ExamAssignmentModel.findOne({
             studentId: req.user.id,
-            examId
+            exam_name: examTitle
         });
 
         if (!assignment) {

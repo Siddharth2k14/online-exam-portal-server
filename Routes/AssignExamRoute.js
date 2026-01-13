@@ -4,17 +4,20 @@ import ObjectiveOuestionModel from "../Models/ObjectiveOuestionModel.js";
 import express from "express";
 import verifyToken from "../Middleware/authMiddleware.js";
 import dotenv from "dotenv";
+import { assignExam } from "../Controllers/assignExamController.js";
 dotenv.config();
 
 const router = express.Router();
 
+router.post("/", verifyToken, assignExam);
+
 router.get(
-    "/exam/:examId/objective-questions",
+    "/exam/:examTitle/objective-questions",
     verifyToken,
     checkExamAccess,
     async (req, res) => {
         const questions = await ObjectiveOuestionModel.find({
-            examId: req.params.examId
+            exam_name: req.params.examTitle
         });
 
         res.json(questions);
@@ -22,12 +25,12 @@ router.get(
 );
 
 router.get(
-    "/exam/:examId/subjective-questions",
+    "/exam/:examTitle/subjective-questions",
     verifyToken,
     checkExamAccess,
     async (req, res) => {
         const questions = await SubjectiveOuestionModel.find({
-            examId: req.params.examId
+            exam_name: req.params.examTitle
         });
 
         res.json(questions);
@@ -35,7 +38,7 @@ router.get(
 );
 
 router.post(
-    "/exam/:examId/start",
+    "/exam/:examTitle/start",
     verifyToken,
     checkExamAccess,
     async (req, res) => {
