@@ -5,6 +5,7 @@ import express from "express";
 import verifyToken from "../Middleware/authMiddleware.js";
 import dotenv from "dotenv";
 import { assignExam } from "../Controllers/assignExamController.js";
+import ExamAssignmentModel from "../Models/ExamAssignmentModel.js";
 dotenv.config();
 
 const router = express.Router();
@@ -57,5 +58,27 @@ router.post(
         res.json({ message: "Exam started successfully" });
     }
 );
+
+router.get("/assigned", verifyToken, async (req, res) => {
+    try {
+        const studentId = req.user.id;
+        const assignments = await ExamAssignmentModel.find({
+            studentId
+        }).json();
+
+        const exams = assignments.map(a => ({
+            exam_name: a.exam_name,
+            status: a.status,
+            assignedAt: a.assignedAt
+        }));
+
+        res.json({
+            exams
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Failed to fetch assigned exams" });
+    }
+})
 
 export default router;
