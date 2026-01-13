@@ -79,6 +79,30 @@ router.get("/assigned", verifyToken, async (req, res) => {
         console.log(error);
         res.status(500).json({ message: "Failed to fetch assigned exams" });
     }
+});
+
+router.post("/assign", verifyToken, async (req, res) => {
+    try {
+        const { exam_name, studentId } = req.body;
+
+        if (!exam_name || !studentId) {
+            return res.status(400).json({ message: "Missing exam name or student ID" });
+        }
+
+        const assignment = new ExamAssignmentModel({
+            exam_name,
+            studentId,
+            assignedAt: new Date(),
+            status: "assigned"
+        });
+
+        await assignment.save();
+
+        res.json({ message: "Exam assigned successfully" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Failed to assign exam" });
+    }
 })
 
 export default router;
