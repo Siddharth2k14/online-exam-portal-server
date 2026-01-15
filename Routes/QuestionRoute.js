@@ -1,6 +1,7 @@
 import express from 'express';
 import ObjectiveOuestionModel from '../Models/ObjectiveOuestionModel.js';
 import SubjectiveOuestionModel from '../Models/SubjectiveOuestionModel.js';
+import mongoose from 'mongoose';
 
 const router = express.Router();
 
@@ -30,18 +31,18 @@ const router = express.Router();
 // };
 
 // // OPTIMIZED: Create database indexes for better performance
-// const ensureIndexes = async () => {
-//   try {
-//     await ObjectiveOuestionModel.collection.createIndex({ exam_name: 1 });
-//     await SubjectiveOuestionModel.collection.createIndex({ exam_name: 1 });
-//     console.log('Database indexes created successfully');
-//   } catch (error) {
-//     console.error('Error creating indexes:', error);
-//   }
-// };
+const ensureIndexes = async () => {
+  try {
+    await ObjectiveOuestionModel.collection.createIndex({ exam_name: 1 });
+    await SubjectiveOuestionModel.collection.createIndex({ exam_name: 1 });
+    console.log('Database indexes created successfully');
+  } catch (error) {
+    console.error('Error creating indexes:', error);
+  }
+};
 
-// // Call this when server starts
-// ensureIndexes();
+// Call this when server starts
+ensureIndexes();
 
 
 router.post('/objective', async (req, res) => {
@@ -54,6 +55,7 @@ router.post('/objective', async (req, res) => {
 
     const newQuestion = new ObjectiveOuestionModel({
       id: Date.now(),
+      exam_id: new mongoose.Types.ObjectId(),
       exam_name: examTitle,
       question_title: question,
       options: options,
@@ -82,11 +84,12 @@ router.post('/subjective', async (req, res) => {
     }
 
     const newQuestion = new SubjectiveOuestionModel({
+      exam_id: new mongoose.Types.ObjectId(),
       exam_name: exam_title,
       question: question,
       answer: answer,
       marks: marks,
-      timer: timer != null ? Number(timer) : null
+      timer: timer ?? null
     });
 
     await newQuestion.save();
@@ -216,6 +219,7 @@ router.get('/exam/:examTitle', async (req, res) => {
         exam_title: examTitle,
         type: 'Objective',
         questions: objectiveQuestions.map(q => ({
+          id: q.id,
           question_text: q.question_title,
           options: q.options,
           correct_option: q.correct_option
@@ -226,6 +230,7 @@ router.get('/exam/:examTitle', async (req, res) => {
         exam_title: examTitle,
         type: 'Subjective',
         questions: subjectiveQuestions.map(q => ({
+          id: q.id,
           question_text: q.question,
           answer: q.answer,
           marks: q.marks,
