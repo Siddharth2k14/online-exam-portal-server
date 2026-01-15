@@ -30,7 +30,7 @@ const router = express.Router();
 //   }
 // };
 
-// // OPTIMIZED: Create database indexes for better performance
+// OPTIMIZED: Create database indexes for better performance
 const ensureIndexes = async () => {
   try {
     await ObjectiveOuestionModel.collection.createIndex({ exam_name: 1 });
