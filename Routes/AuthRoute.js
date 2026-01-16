@@ -239,8 +239,8 @@ router.get('/:role/all', async (req, res) => {
 
     // Validate role parameter
     if (!validRoles.includes(role)) {
-      return res.status(400).json({ 
-        message: "Invalid role. Must be 'student' or 'admin'" 
+      return res.status(400).json({
+        message: "Invalid role. Must be 'student' or 'admin'"
       });
     }
 
@@ -248,8 +248,8 @@ router.get('/:role/all', async (req, res) => {
     const users = await User.find({ role: role });
 
     if (!users || users.length === 0) {
-      return res.status(404).json({ 
-        message: `No ${role}s found` 
+      return res.status(404).json({
+        message: `No ${role}s found`
       });
     }
 
@@ -258,7 +258,7 @@ router.get('/:role/all', async (req, res) => {
 
     // Create response with appropriate key
     const responseKey = role === 'admin' ? 'admins' : 'students';
-    
+
     res.json({
       message: `Found ${users.length} ${role}s`,
       [responseKey]: users
@@ -280,8 +280,8 @@ router.get('/all', async (req, res) => {
     const users = await User.find();
 
     if (!users || users.length === 0) {
-      return res.status(404).json({ 
-        message: "No users found" 
+      return res.status(404).json({
+        message: "No users found"
       });
     }
 
