@@ -69,7 +69,8 @@ router.get("/assigned", verifyToken, async (req, res) => {
         const exams = assignments.map(a => ({
             exam_name: a.exam_name,
             status: a.status,
-            assignedAt: a.assignedAt
+            assignedAt: a.assignedAt,
+            exam_type: a.exam_type
         }));
 
         res.json({
@@ -93,7 +94,8 @@ router.post("/assign", async (req, res) => {
             exam_name,
             studentId,
             assignedAt: new Date(),
-            status: "assigned"
+            status: "assigned",
+            exam_type: req.body.exam_type
         });
 
         await assignment.save();

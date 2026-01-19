@@ -7,7 +7,7 @@ const SubjectiveQuestionSchema = new mongoose.Schema({
     question: { type: String, required: true, trim: true },
     answer: { type: String, required: true, trim: true },
     marks: { type: Number, required: true, min: 0 },
-    timer: { type: Number, required: true, default: null },
+    timer: { type: Number, default: null },
     createdAt: { type: Date, default: Date.now }
 });
 
