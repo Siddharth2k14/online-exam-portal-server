@@ -1,4 +1,4 @@
-import ExamAssignmentModel from "../Models/ExamAssignmentModel.js";
+import ExamAssignmentModel from "../Models/ExamAssignment.model.js";
 
 const checkExamAccess = async (req, res, next) => {
     try {

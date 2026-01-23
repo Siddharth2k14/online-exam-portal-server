@@ -1,6 +1,6 @@
 import express from 'express';
-import ObjectiveOuestionModel from '../Models/ObjectiveOuestionModel.js';
-import SubjectiveOuestionModel from '../Models/SubjectiveOuestionModel.js';
+import ObjectiveOuestionModel from '../Models/ObjectiveQuestion.model.js';
+import SubjectiveOuestionModel from '../Models/SubjectiveQuestion.model.js';
 import mongoose from 'mongoose';
 
 const router = express.Router();

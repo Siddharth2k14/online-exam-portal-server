@@ -1,5 +1,5 @@
-import ExamAssignment from "../Models/ExamAssignmentModel.js";
-import User from "../Models/AuthModel.js";
+import ExamAssignment from "../Models/ExamAssignment.model.js";
+import User from "../Models/Auth.model.js";
 
 /*
 Request Body:

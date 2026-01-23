@@ -4,10 +4,10 @@ dotenv.config();
 // Other imports should come after dotenv configuration
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import User from '../Models/AuthModel.js';
+import User from '../Models/Auth.model.js';
 import express from 'express';
 import process from 'process';
-import authMiddleware from '../Middleware/authMiddleware.js';
+import authMiddleware from '../Middleware/auth.middleware.js';
 
 const router = express.Router();
 

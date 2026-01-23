@@ -1,7 +1,7 @@
-import ExamAssignmentModel from "../Models/ExamAssignmentModel.js";
+import ExamAssignmentModel from "../Models/ExamAssignment.model.js";
 
-export const getQuestions = async (req, res) => {
-    const { examId } = req.params;
+export const checkExamAccess = async (req, res, next) => {
+    const examId = req.params.examId;
 
     const assignment = await ExamAssignmentModel.findOne({
         studentId: req.user.id,
@@ -11,4 +11,7 @@ export const getQuestions = async (req, res) => {
     if (!assignment) {
         return res.status(403).json({ message: "Exam not assigned" });
     }
+
+    req.assignment = assignment;
+    next();
 };

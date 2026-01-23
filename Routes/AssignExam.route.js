@@ -1,11 +1,11 @@
-import SubjectiveOuestionModel from "../Models/SubjectiveOuestionModel.js";
-import checkExamAccess from "../Middleware/checkExamAccess.js";
-import ObjectiveOuestionModel from "../Models/ObjectiveOuestionModel.js";
+import SubjectiveOuestionModel from "../Models/SubjectiveQuestion.model.js";
+import checkExamAccess from "../Middleware/checkExamAccess.middleware.js";
+import ObjectiveOuestionModel from "../Models/ObjectiveQuestion.model.js";
 import express from "express";
-import verifyToken from "../Middleware/authMiddleware.js";
+import verifyToken from "../Middleware/auth.middleware.js";
 import dotenv from "dotenv";
-import { assignExam } from "../Controllers/assignExamController.js";
-import ExamAssignmentModel from "../Models/ExamAssignmentModel.js";
+import { assignExam } from "../Controllers/assignExam.controller.js";
+import ExamAssignmentModel from "../Models/ExamAssignment.model.js";
 dotenv.config();
 
 const router = express.Router();
