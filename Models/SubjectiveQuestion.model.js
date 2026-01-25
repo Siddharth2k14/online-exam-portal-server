@@ -11,6 +11,6 @@ const SubjectiveQuestionSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-const SubjectiveOuestionModel = mongoose.model("SubjectiveQuestion", SubjectiveQuestionSchema);
+const SubjectiveQuestionModel = mongoose.model("SubjectiveQuestion", SubjectiveQuestionSchema);
 
-export default SubjectiveOuestionModel;
+export default SubjectiveQuestionModel;

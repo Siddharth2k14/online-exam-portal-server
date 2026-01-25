@@ -1,110 +1,34 @@
-import SubjectiveOuestionModel from "../Models/SubjectiveQuestion.model.js";
-import checkExamAccess from "../Middleware/checkExamAccess.middleware.js";
-import ObjectiveOuestionModel from "../Models/ObjectiveQuestion.model.js";
+// Importing express
 import express from "express";
+
+// Importing middleware
+import checkExamAccess from "../Middleware/checkExamAccess.middleware.js";
 import verifyToken from "../Middleware/auth.middleware.js";
 import dotenv from "dotenv";
-import { assignExam } from "../Controllers/assignExam.controller.js";
-import ExamAssignmentModel from "../Models/ExamAssignment.model.js";
+
+// Importing controllers
+import { assignExam, objectiveExam, subjectiveExam, startExam, assignedExam } from "../Controllers/assignExam.controller.js";
+
+// Configuring dotenv
 dotenv.config();
 
+// Initializing the router
 const router = express.Router();
 
-router.post("/", verifyToken, assignExam);
+// Route for getting objective questions of an exam
+router.get("/exam/:examTitle/objective-questions", verifyToken, checkExamAccess, objectiveExam);
 
-router.get(
-    "/exam/:examTitle/objective-questions",
-    verifyToken,
-    checkExamAccess,
-    async (req, res) => {
-        const questions = await ObjectiveOuestionModel.find({
-            exam_name: req.params.examTitle
-        });
+// Route for getting subjective questions of an exam
+router.get("/exam/:examTitle/subjective-questions", verifyToken, checkExamAccess, subjectiveExam);
 
-        res.json(questions);
-    }
-);
+// Route for starting an exam
+router.post("/exam/:examTitle/start", verifyToken, checkExamAccess, startExam);
 
-router.get(
-    "/exam/:examTitle/subjective-questions",
-    verifyToken,
-    checkExamAccess,
-    async (req, res) => {
-        const questions = await SubjectiveOuestionModel.find({
-            exam_name: req.params.examTitle
-        });
+// Route for getting assigned exams of a student
+router.get("/assigned", verifyToken, assignedExam);
 
-        res.json(questions);
-    }
-);
+// Route for assigning an exam to a student
+router.post("/assign", verifyToken, checkExamAccess, assignExam);
 
-router.post(
-    "/exam/:examTitle/start",
-    verifyToken,
-    checkExamAccess,
-    async (req, res) => {
-        const assignment = req.assignment;
-
-        if (assignment.attemptCount >= 1) {
-            return res.status(403).json({
-                message: "Attempt limit exceeded"
-            });
-        }
-
-        assignment.status = "started";
-        assignment.attemptCount += 1;
-        await assignment.save();
-
-        res.json({ message: "Exam started successfully" });
-    }
-);
-
-router.get("/assigned", verifyToken, async (req, res) => {
-    try {
-        const studentId = req.user.id;
-        const assignments = await ExamAssignmentModel.find({
-            studentId
-        }).lean();
-
-        const exams = assignments.map(a => ({
-            exam_name: a.exam_name,
-            status: a.status,
-            assignedAt: a.assignedAt,
-            exam_type: a.exam_type
-        }));
-
-        res.json({
-            exams
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Failed to fetch assigned exams" });
-    }
-});
-
-router.post("/assign", async (req, res) => {
-    try {
-        const { exam_name, studentId } = req.body;
-
-        if (!exam_name || !studentId) {
-            return res.status(400).json({ message: "Missing exam name or student ID" });
-        }
-
-        const assignment = new ExamAssignmentModel({
-            exam_name,
-            studentId,
-            assignedAt: new Date(),
-            status: "assigned",
-            exam_type: req.body.exam_type
-        });
-
-        await assignment.save();
-
-        res.json({ message: "Exam assigned successfully" });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Failed to assign exam" });
-    }
-})
-
+// Exporting the router
 export default router;

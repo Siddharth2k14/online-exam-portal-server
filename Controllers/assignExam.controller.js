@@ -1,67 +1,113 @@
-import ExamAssignment from "../Models/ExamAssignment.model.js";
-import User from "../Models/Auth.model.js";
+// Importing models
+import ExamAssignmentModel from "../Models/ExamAssignment.model.js";
+import ObjectiveQuestionModel from "../Models/ObjectiveQuestion.model.js";
+import SubjectiveQuestionModel from "../Models/SubjectiveQuestion.model.js";
 
-/*
-Request Body:
-{
-  exam_name: "Maths Test",
-  studentId: "64ab123..."
-}
-*/
-
+// Assigning an exam to a student
 export const assignExam = async (req, res) => {
     try {
-        const { exam_name, studentId } = req.body;
+        const { exam_name, studentId, exam_type, exam_id } = req.body;
 
-        // ---------------- VALIDATION ----------------
-        if (!exam_name || !studentId) {
-            return res.status(400).json({
-                message: "exam_name and studentId are required",
-            });
+        if (!exam_name || !studentId || !exam_type || !exam_id) {
+            return res.status(400).json({ message: "Missing exam name or student ID" });
         }
 
-        // ---------------- CHECK STUDENT ----------------
-        const student = await User.findById(studentId);
-        if (!student) {
-            return res.status(404).json({
-                message: "Student not found",
-            });
-        }
-
-        if (student.role !== "student") {
-            return res.status(400).json({
-                message: "User is not a student",
-            });
-        }
-
-        // ---------------- CHECK DUPLICATE ASSIGNMENT ----------------
-        const existingAssignment = await ExamAssignment.findOne({
-            studentId,
+        const assignment = new ExamAssignmentModel({
             exam_name,
-        });
-
-        if (existingAssignment) {
-            return res.status(409).json({
-                message: "Exam already assigned to this student",
-            });
-        }
-
-        // ---------------- CREATE ASSIGNMENT ----------------
-        const assignment = await ExamAssignment.create({
             studentId,
-            exam_name,
+            assignedAt: new Date(),
             status: "assigned",
+            exam_type,
+            exam_id
         });
 
-        return res.status(201).json({
-            message: "Exam assigned successfully",
-            assignment,
-        });
+        await assignment.save();
 
+        res.json({ message: "Exam assigned successfully" });
     } catch (error) {
-        console.error("Assign Exam Error:", error);
+        console.log(error);
+        res.status(500).json({ message: "Failed to assign exam" });
+    }
+};
+
+// Fetching objective questions
+export const objectiveExam = async (req, res) => {
+    try {
+        const questions = await ObjectiveQuestionModel.find({
+            exam_name: req.params.examTitle
+        });
+
+        res.json(questions);
+    } catch (error) {
+        console.error("Objective Exam Error:", error);
         return res.status(500).json({
             message: "Internal server error",
         });
     }
-};
+}
+
+// Fetching subjective questions
+export const subjectiveExam = async (req, res) => {
+    try {
+        const questions = await SubjectiveQuestionModel.find({
+            exam_name: req.params.examTitle
+        });
+
+        res.json(questions);
+    } catch (error) {
+        console.error("Subjective Exam Error:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+        });
+    }
+}
+
+// Starting the exam
+export const startExam = async (req, res) => {
+    try {
+        const assignment = req.assignment;
+
+        if (assignment.attemptCount >= 1) {
+            return res.status(403).json({
+                message: "Attempt limit exceeded"
+            });
+        }
+
+        assignment.status = "started";
+        assignment.attemptCount += 1;
+        await assignment.save();
+
+        res.json({
+            message: "Exam started successfully"
+        });
+    } catch (error) {
+        console.error("Start Exam Error:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+        });
+    }
+}
+
+// Fetching assigned exams to a student
+export const assignedExam = async (req, res) => {
+    try {
+        const studentId = req.user.id;
+        const assignments = await ExamAssignmentModel.find({
+            studentId
+        }).lean();
+
+        const exams = assignments.map(a => ({
+            exam_name: a.exam_name,
+            status: a.status,
+            assignedAt: a.assignedAt,
+            exam_type: a.exam_type
+        }));
+
+        res.json({
+            exams
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Failed to fetch assigned exams" });
+    }
+}

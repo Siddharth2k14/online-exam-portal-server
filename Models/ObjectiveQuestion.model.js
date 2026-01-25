@@ -38,5 +38,5 @@ const ObjectiveQuestionSchema = new mongoose.Schema({
     },
 });
 
-const ObjectiveOuestionModel = mongoose.model("Question", ObjectiveQuestionSchema);
-export default ObjectiveOuestionModel;
+const ObjectiveQuestionModel = mongoose.model("Question", ObjectiveQuestionSchema);
+export default ObjectiveQuestionModel;
