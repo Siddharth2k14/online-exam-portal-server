@@ -2,7 +2,7 @@
 import express from 'express';
 
 // Importing controllers
-import { getAllSubmissions, submitExam, submitResult } from '../Controllers/submission.controller';
+import { getAllSubmissions, submitExam, submitResult } from '../Controllers/submission.controller.js';
 
 // Initializing the router
 const router = express.Router();
