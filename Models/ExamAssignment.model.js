@@ -30,3 +30,4 @@ const ExamAssignmentSchema = new mongoose.Schema({
 });
 
 const ExamAssignmentModel = mongoose.model("ExamAssignment", ExamAssignmentSchema);
+export default ExamAssignmentModel;
