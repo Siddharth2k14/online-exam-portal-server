@@ -1,7 +1,7 @@
 // Importing models
 import ObjectiveQuestionModel from "../Models/ObjectiveQuestion.model.js";
 import SubjectiveQuestionModel from "../Models/SubjectiveQuestion.model.js";
-import SubmissionModel from "../Models/Submission.model";
+import SubmissionModel from "../Models/Submission.model.js";
 
 // Matches the student answer with the correct answer
 function areAnswersSimilar(studentAns, correctAns) {
