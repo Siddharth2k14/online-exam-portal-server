@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 const ExamAssignmentSchema = new mongoose.Schema({
     studentId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -26,3 +28,5 @@ const ExamAssignmentSchema = new mongoose.Schema({
         default: Date.now,
     },
 });
+
+const ExamAssignmentModel = mongoose.model("ExamAssignment", ExamAssignmentSchema);
