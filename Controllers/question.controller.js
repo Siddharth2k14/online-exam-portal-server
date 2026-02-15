@@ -2,8 +2,8 @@
 import mongoose from "mongoose";
 
 // Importing models
-import ObjectiveQuestionModel from "../Models/ObjectiveQuestion.model";
-import SubjectiveQuestionModel from "../Models/SubjectiveQuestion.model";
+import ObjectiveQuestionModel from "../Models/ObjectiveQuestion.model.js";
+import SubjectiveQuestionModel from "../Models/SubjectiveQuestion.model.js";
 
 // Controller for creating objective questions
 export const createObjectiveQuestion = async (req, res) => {

@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
 // Importing models
-import User from "../Models/Auth.model";
+import User from "../Models/Auth.model.js";
 
 // Function to validate password
 const validatePassword = (password) => {

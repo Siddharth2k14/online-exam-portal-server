@@ -1,6 +1,6 @@
 // Importing models
-import ObjectiveQuestionModel from "../Models/ObjectiveQuestion.model";
-import SubjectiveQuestionModel from "../Models/SubjectiveQuestion.model";
+import ObjectiveQuestionModel from "../Models/ObjectiveQuestion.model.js";
+import SubjectiveQuestionModel from "../Models/SubjectiveQuestion.model.js";
 import SubmissionModel from "../Models/Submission.model";
 
 // Matches the student answer with the correct answer
