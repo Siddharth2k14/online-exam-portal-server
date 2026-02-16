@@ -28,7 +28,7 @@ router.post("/exam/:examTitle/start", verifyToken, checkExamAccess, startExam);
 router.get("/assigned", verifyToken, assignedExam);
 
 // Route for assigning an exam to a student
-router.post("/assign", verifyToken, checkExamAccess, assignExam);
+router.post("/assign", checkExamAccess, assignExam);
 
 // Exporting the router
 export default router;
