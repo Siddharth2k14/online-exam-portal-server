@@ -4,11 +4,11 @@ import ObjectiveQuestionModel from "../Models/ObjectiveQuestion.model.js";
 import SubjectiveQuestionModel from "../Models/SubjectiveQuestion.model.js";
 
 // Assigning an exam to a student
-export const assignExam = async (req, res) => {
+const assignExam = async (req, res) => {
     try {
-        const { exam_name, studentId, exam_type, exam_id } = req.body;
+        const { exam_name, studentId, exam_type } = req.body;
 
-        if (!exam_name || !studentId || !exam_type || !exam_id) {
+        if (!exam_name || !studentId || !exam_type) {
             return res.status(400).json({ message: "Missing exam name or student ID" });
         }
 
@@ -17,8 +17,7 @@ export const assignExam = async (req, res) => {
             studentId,
             assignedAt: new Date(),
             status: "assigned",
-            exam_type,
-            exam_id
+            exam_type
         });
 
         await assignment.save();
@@ -31,7 +30,7 @@ export const assignExam = async (req, res) => {
 };
 
 // Fetching objective questions
-export const objectiveExam = async (req, res) => {
+const objectiveExam = async (req, res) => {
     try {
         const questions = await ObjectiveQuestionModel.find({
             exam_name: req.params.examTitle
@@ -47,7 +46,7 @@ export const objectiveExam = async (req, res) => {
 }
 
 // Fetching subjective questions
-export const subjectiveExam = async (req, res) => {
+const subjectiveExam = async (req, res) => {
     try {
         const questions = await SubjectiveQuestionModel.find({
             exam_name: req.params.examTitle
@@ -63,7 +62,7 @@ export const subjectiveExam = async (req, res) => {
 }
 
 // Starting the exam
-export const startExam = async (req, res) => {
+const startExam = async (req, res) => {
     try {
         const assignment = req.assignment;
 
@@ -89,7 +88,7 @@ export const startExam = async (req, res) => {
 }
 
 // Fetching assigned exams to a student
-export const assignedExam = async (req, res) => {
+const assignedExam = async (req, res) => {
     try {
         const studentId = req.user.id;
         const assignments = await ExamAssignmentModel.find({
@@ -111,3 +110,11 @@ export const assignedExam = async (req, res) => {
         res.status(500).json({ message: "Failed to fetch assigned exams" });
     }
 }
+
+export default {
+    assignExam,
+    objectiveExam,
+    subjectiveExam,
+    startExam,
+    assignedExam
+};

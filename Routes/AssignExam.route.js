@@ -7,7 +7,11 @@ import verifyToken from "../Middleware/auth.middleware.js";
 import dotenv from "dotenv";
 
 // Importing controllers
-import { assignExam, objectiveExam, subjectiveExam, startExam, assignedExam } from "../Controllers/assignExam.controller.js";
+import { assignExam } from "../Controllers/assignExam.controller.js";
+import { objectiveExam } from "../Controllers/assignExam.controller.js";
+import { subjectiveExam } from "../Controllers/assignExam.controller.js";
+import { startExam } from "../Controllers/assignExam.controller.js";
+import { assignedExam } from "../Controllers/assignExam.controller.js";
 
 // Configuring dotenv
 dotenv.config();
