@@ -7,11 +7,7 @@ import verifyToken from "../Middleware/auth.middleware.js";
 import dotenv from "dotenv";
 
 // Importing controllers
-import { assignExam } from "../Controllers/assignExam.controller.js";
-import { objectiveExam } from "../Controllers/assignExam.controller.js";
-import { subjectiveExam } from "../Controllers/assignExam.controller.js";
-import { startExam } from "../Controllers/assignExam.controller.js";
-import { assignedExam } from "../Controllers/assignExam.controller.js";
+import examController from "../Controllers/assignExam.controller.js";
 
 // Configuring dotenv
 dotenv.config();
@@ -20,19 +16,19 @@ dotenv.config();
 const router = express.Router();
 
 // Route for getting objective questions of an exam
-router.get("/exam/:examTitle/objective-questions", verifyToken, checkExamAccess, objectiveExam);
+router.get("/exam/:examTitle/objective-questions", verifyToken, checkExamAccess, examController.objectiveExam);
 
 // Route for getting subjective questions of an exam
-router.get("/exam/:examTitle/subjective-questions", verifyToken, checkExamAccess, subjectiveExam);
+router.get("/exam/:examTitle/subjective-questions", verifyToken, checkExamAccess, examController.subjectiveExam);
 
 // Route for starting an exam
-router.post("/exam/:examTitle/start", verifyToken, checkExamAccess, startExam);
+router.post("/exam/:examTitle/start", verifyToken, checkExamAccess, examController.startExam);
 
 // Route for getting assigned exams of a student
-router.get("/assigned", verifyToken, assignedExam);
+router.get("/assigned", verifyToken, examController.assignedExam);
 
 // Route for assigning an exam to a student
-router.post("/assign", assignExam);
+router.post("/assign", examController.assignExam);
 
 // Exporting the router
 export default router;
