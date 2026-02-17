@@ -99,7 +99,8 @@ const assignedExam = async (req, res) => {
             exam_name: a.exam_name,
             status: a.status,
             assignedAt: a.assignedAt,
-            exam_type: a.exam_type
+            exam_type: a.exam_type,
+            question_count: a.question_count
         }));
 
         res.json({

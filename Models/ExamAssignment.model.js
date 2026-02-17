@@ -27,6 +27,10 @@ const ExamAssignmentSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    question_count: {
+        type: Number,
+        default: 0,
+    }
 });
 
 const ExamAssignmentModel = mongoose.model("ExamAssignment", ExamAssignmentSchema);
