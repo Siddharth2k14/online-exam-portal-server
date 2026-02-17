@@ -104,7 +104,7 @@ const assignedExam = async (req, res) => {
         }));
 
         res.json({
-            exams
+            exams: exams
         });
     } catch (error) {
         console.log(error);
