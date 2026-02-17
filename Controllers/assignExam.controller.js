@@ -13,11 +13,11 @@ const assignExam = async (req, res) => {
         }
 
         const assignment = new ExamAssignmentModel({
-            exam_name,
             studentId,
-            assignedAt: new Date(),
+            exam_name,
+            exam_type,
             status: "assigned",
-            exam_type
+            assignedAt: new Date()
         });
 
         await assignment.save();
